@@ -1,0 +1,1912 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendário de Compras 2026 - Prefeitura de Curvelo</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons (Versão Estável) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        /* --- Estilos de Impressão --- */
+        @media print {
+            /* Oculta elementos estruturais da navegação e controle */
+            header, nav, #profileModal, #deleteConfirmModal, #importConfirmModal, .no-print { 
+                display: none !important; 
+            }
+
+            /* Configurações do corpo para impressão */
+            body {
+                background-color: white;
+                color: black;
+                font-size: 12pt;
+            }
+
+            /* Garante que a área principal ocupe tudo */
+            main {
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+                max-width: none !important;
+                box-shadow: none !important;
+            }
+
+            /* Oculta todas as abas... */
+            .tab-content {
+                display: none !important;
+            }
+
+            /* ...Exceto a aba do calendário, que forçamos a aparecer */
+            #tab-calendario {
+                display: block !important;
+                visibility: visible !important;
+            }
+
+            /* Remove sombras e bordas dos containers internos para economizar tinta */
+            #tab-calendario .bg-white {
+                box-shadow: none !important;
+                border: none !important;
+            }
+
+            /* Ajustes nos cards do mês para não quebrar página no meio */
+            .calendar-month {
+                page-break-inside: avoid;
+                border: 1px solid #ccc;
+                margin-bottom: 20px;
+                padding: 10px;
+            }
+            
+            /* Garante cores de fundo (para distinguir comuns/específicos) */
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+        }
+
+        /* Estilo base para a aba ativa */
+        .tab-button {
+            border-bottom: 4px solid transparent;
+        }
+        .tab-button.active {
+            border-bottom-color: #1d4ed8; /* blue-800 */
+            color: #1d4ed8;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 font-sans text-slate-800">
+
+    <!-- Cabeçalho Fixo -->
+    <header class="w-full bg-[#004a91] text-white shadow-md p-4 flex justify-between items-center no-print">
+        <div class="flex items-center gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-days"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
+            <h1 class="text-xl font-semibold">Calendário de Compras 2026 - Prefeitura de Curvelo</h1>
+        </div>
+        <div class="flex items-center gap-4">
+            <span id="currentUserDisplay" class="text-sm">Carregando...</span>
+            <button id="editProfileButton" class="text-sm flex items-center gap-1 bg-white/20 hover:bg-white/30 px-3 py-1 rounded-md transition-colors">
+                <i data-lucide="building-2" class="w-4 h-4"></i>
+                <span id="currentUnitDisplay">Selecione sua Unidade</span>
+            </button>
+            <span id="authStatus" class="text-xs"></span>
+        </div>
+    </header>
+
+    <!-- Navegação por Abas -->
+    <nav class="w-full bg-white shadow-sm border-b border-gray-200 no-print">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex items-center gap-8">
+                <button id="btn-tab-solicitacoes" class="tab-button active text-slate-600 hover:text-blue-700 py-4 px-2" data-tab="tab-solicitacoes">
+                    <i data-lucide="edit" class="w-4 h-4 inline-block mr-1"></i>
+                    Minhas Solicitações
+                </button>
+                <button id="btn-tab-calendario" class="tab-button text-slate-600 hover:text-blue-700 py-4 px-2" data-tab="tab-calendario">
+                    <i data-lucide="calendar" class="w-4 h-4 inline-block mr-1"></i>
+                    Calendário Global
+                </button>
+                <!-- Abas Administrativas (Visíveis apenas para Fazenda) -->
+                <button id="btn-tab-grupos" class="tab-button text-slate-600 hover:text-blue-700 py-4 px-2 hidden" data-tab="tab-grupos">
+                    <i data-lucide="list-checks" class="w-4 h-4 inline-block mr-1"></i>
+                    Grupos Licitatórios
+                </button>
+                <button id="btn-tab-analise" class="tab-button text-slate-600 hover:text-blue-700 py-4 px-2 hidden" data-tab="tab-analise">
+                    <i data-lucide="pie-chart" class="w-4 h-4 inline-block mr-1"></i>
+                    Análise de Demandas
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Conteúdo Principal -->
+    <main class="max-w-7xl mx-auto p-4 w-full">
+
+        <!-- Aba: Minhas Solicitações -->
+        <div id="tab-solicitacoes" class="tab-content space-y-6">
+            <div class="bg-white border border-gray-200 shadow-sm rounded-xl p-6">
+                <h2 class="text-2xl font-semibold text-slate-700 mb-4">Minhas Solicitações de Demanda (Ano: 2026)</h2>
+                <p class="text-slate-600 mb-6">
+                    Para cada grupo licitatório abaixo, indique seu nível de prioridade (de 1 a 10).
+                    Selecione "0" se não houver interesse de contratação para sua unidade.
+                </p>
+
+                <!-- Filtros e Controles -->
+                <div class="flex justify-between items-center mb-4">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="search" class="w-5 h-5 text-gray-400"></i>
+                        <input type="text" id="filterMyRequests" placeholder="Filtrar por nome ou nº do grupo..." class="border border-gray-300 rounded-md px-3 py-2 w-72 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <label class="flex items-center gap-2 text-sm text-slate-600">
+                            <input type="checkbox" id="showOnlyPending" class="rounded text-blue-600 focus:ring-blue-500">
+                            Mostrar apenas não preenchidos
+                        </label>
+                        <button id="saveAllMyRequests" class="bg-blue-800 hover:bg-blue-700 text-white font-medium px-5 py-2 rounded-lg shadow-sm transition-all duration-200 flex items-center gap-2 min-w-[180px] justify-center">
+                            <i data-lucide="save" class="w-5 h-5"></i>
+                            <span>Salvar Alterações</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tabela de Solicitações -->
+                <div class="overflow-hidden border border-gray-200 rounded-lg">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-slate-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider w-24">Nº Grupo</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Grupo Licitatório</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider w-48">Prioridade (0 a 10)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="myRequestsTable" class="bg-white divide-y divide-gray-200">
+                            <!-- Linhas serão inseridas por JS -->
+                            <tr>
+                                <td colspan="3" class="px-6 py-4 text-center text-gray-500">
+                                    <div class="flex items-center justify-center gap-2">
+                                        <i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i>
+                                        Carregando grupos...
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Aba: Calendário Global -->
+        <div id="tab-calendario" class="tab-content space-y-6 hidden">
+            <div class="bg-white border border-gray-200 shadow-sm rounded-xl p-6">
+                <div class="flex justify-between items-center mb-6 no-print">
+                    <h2 class="text-2xl font-semibold text-slate-700">Calendário Global de Licitações 2026</h2>
+                    <button id="printCalendarButton" class="bg-blue-800 hover:bg-blue-700 text-white font-medium px-5 py-2 rounded-lg shadow-sm transition-colors flex items-center gap-2">
+                        <i data-lucide="printer" class="w-5 h-5"></i>
+                        Imprimir
+                    </button>
+                </div>
+                <p class="text-slate-600 mb-6 no-print">
+                    O calendário é gerado automaticamente, distribuindo os grupos com <strong>maior prioridade média</strong> pelos meses.
+                </p>
+
+                <!-- Área de Impressão do Calendário -->
+                <div id="calendar-print-area" class="space-y-8">
+                    <!-- Meses serão preenchidos pelo JS -->
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Aba: Grupos Licitatórios (Admin - Restrito) -->
+        <div id="tab-grupos" class="tab-content space-y-6 hidden">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                
+                <!-- Coluna da Esquerda: Ações -->
+                <div class="md:col-span-1 space-y-6">
+                    
+                    <!-- Card de Edição Manual -->
+                    <div class="bg-white border border-gray-200 shadow-sm rounded-xl p-6 sticky top-6">
+                        <h2 class="text-2xl font-semibold text-slate-700 mb-4">Editar / Adicionar</h2>
+                        <form id="groupForm" class="space-y-4">
+                            <input type="hidden" id="groupId">
+                            <div>
+                                <label for="groupNumber" class="block text-sm font-medium text-slate-600">Nº do Grupo (3 dígitos)</label>
+                                <input type="text" id="groupNumber" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Ex: 400" required>
+                            </div>
+                            <div>
+                                <label for="groupName" class="block text-sm font-medium text-slate-600">Nome do Grupo</label>
+                                <input type="text" id="groupName" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+                            </div>
+                            <div class="flex flex-col gap-3">
+                                <button type="submit" class="w-full bg-blue-800 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg shadow-sm transition-colors flex items-center justify-center gap-2">
+                                    <i data-lucide="save" class="w-5 h-5"></i>
+                                    Salvar Grupo
+                                </button>
+                                <button type="button" id="cancelGroupEdit" class="w-full bg-white hover:bg-slate-50 text-slate-700 font-medium py-2 px-4 rounded-lg border border-gray-300 shadow-sm transition-colors hidden">
+                                    Cancelar Edição
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- Card de Sincronização Padrão -->
+                    <div class="bg-white border border-gray-200 shadow-sm rounded-xl p-6">
+                        <h3 class="text-lg font-semibold text-slate-700 mb-3">Sincronizar Grupos</h3>
+                        <p class="text-sm text-slate-600 mb-4">
+                            Clique para carregar a lista padrão.
+                            Isso também corrigirá numerações antigas (6 dígitos) para o novo padrão (3 dígitos).
+                        </p>
+                        <button id="syncDefaultGroups" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2 px-4 rounded-lg shadow-sm transition-colors flex items-center justify-center gap-2">
+                            <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+                            Sincronizar / Corrigir
+                        </button>
+                    </div>
+
+                    <!-- NOVO: Card de Importação CSV -->
+                    <div class="bg-white border border-gray-200 shadow-sm rounded-xl p-6">
+                        <div class="flex items-center gap-2 mb-3">
+                            <div class="p-2 bg-indigo-100 rounded-full text-indigo-600">
+                                <i data-lucide="file-spreadsheet" class="w-5 h-5"></i>
+                            </div>
+                            <h3 class="text-lg font-semibold text-slate-700">Importar CSV</h3>
+                        </div>
+                        <p class="text-sm text-slate-600 mb-4">
+                            Importe uma lista personalizada.<br>
+                            <strong>Coluna A:</strong> Nº do Grupo<br>
+                            <strong>Coluna B:</strong> Nome do Grupo
+                        </p>
+                        <input type="file" id="csvFileInput" accept=".csv" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 mb-4 border border-gray-200 rounded-lg"/>
+                        <button id="btnProcessImport" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2 px-4 rounded-lg shadow-sm transition-colors flex items-center justify-center gap-2">
+                            <i data-lucide="upload" class="w-5 h-5"></i>
+                            Processar Arquivo
+                        </button>
+                    </div>
+
+                </div>
+
+                <!-- Coluna da Direita: Lista de Grupos Cadastrados -->
+                <div class="md:col-span-2">
+                    <div class="bg-white border border-gray-200 shadow-sm rounded-xl p-6">
+                        <div class="flex justify-between items-center mb-4">
+                             <h3 class="text-lg font-semibold text-slate-700">Grupos Cadastrados</h3>
+                             <div class="flex items-center gap-2">
+                                <i data-lucide="search" class="w-5 h-5 text-gray-400"></i>
+                                <input type="text" id="filterGroups" placeholder="Filtrar grupos..." class="border border-gray-300 rounded-md px-3 py-2 w-64 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                             </div>
+                        </div>
+                       
+                        <div class="max-h-[800px] overflow-y-auto border border-gray-200 rounded-lg">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-slate-50 sticky top-0 z-10">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider w-24">Nº</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Nome do Grupo</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider w-32">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="groupsTable" class="bg-white divide-y divide-gray-200">
+                                    <!-- Linhas inseridas por JS -->
+                                    <tr>
+                                        <td colspan="3" class="px-6 py-4 text-center text-gray-500">Carregando...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Aba: Análise de Demandas (Admin - Restrito) -->
+        <div id="tab-analise" class="tab-content space-y-6 hidden">
+            <!-- Cabeçalho com Botão de Exportar -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white border border-gray-200 shadow-sm rounded-xl p-6">
+                <div>
+                    <h2 class="text-2xl font-semibold text-slate-700">Painel de Consolidação</h2>
+                    <p class="text-sm text-slate-500">Visão geral e exportação de dados.</p>
+                </div>
+                <button id="exportReportButton" class="bg-green-700 hover:bg-green-600 text-white font-medium px-5 py-2 rounded-lg shadow-sm transition-colors flex items-center gap-2">
+                    <i data-lucide="download" class="w-5 h-5"></i>
+                    Exportar Relatório (CSV)
+                </button>
+            </div>
+
+            <!-- Métricas Principais -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="bg-white border border-gray-200 shadow-sm rounded-xl p-6 flex items-center gap-4">
+                    <div class="p-3 rounded-full bg-blue-100 text-blue-700">
+                        <i data-lucide="list-checks" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <div class="text-sm font-medium text-slate-500">Total de Grupos</div>
+                        <div id="metricTotalGroups" class="text-3xl font-bold text-slate-800">0</div>
+                    </div>
+                </div>
+                <div class="bg-white border border-gray-200 shadow-sm rounded-xl p-6 flex items-center gap-4">
+                    <div class="p-3 rounded-full bg-green-100 text-green-700">
+                        <i data-lucide="check-circle" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <div class="text-sm font-medium text-slate-500">Grupos com Demanda</div>
+                        <div id="metricDemandGroups" class="text-3xl font-bold text-slate-800">0</div>
+                    </div>
+                </div>
+                <div class="bg-white border border-gray-200 shadow-sm rounded-xl p-6 flex items-center gap-4">
+                    <div class="p-3 rounded-full bg-orange-100 text-orange-700">
+                        <i data-lucide="users" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <div class="text-sm font-medium text-slate-500">Pedidos Comuns (>2)</div>
+                        <div id="metricCommonRequests" class="text-3xl font-bold text-slate-800">0</div>
+                    </div>
+                </div>
+                <div class="bg-white border border-gray-200 shadow-sm rounded-xl p-6 flex items-center gap-4">
+                    <div class="p-3 rounded-full bg-purple-100 text-purple-700">
+                        <i data-lucide="user" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <div class="text-sm font-medium text-slate-500">Pedidos Específicos (1-2)</div>
+                        <div id="metricSpecificRequests" class="text-3xl font-bold text-slate-800">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Listas de Pedidos Comuns e Específicos -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Pedidos Comuns -->
+                <div class="bg-white border border-gray-200 shadow-sm rounded-xl p-6">
+                    <h3 class="text-xl font-semibold text-slate-700 mb-4">Pedidos Comuns (> 2 Unidades)</h3>
+                    <p class="text-sm text-slate-500 mb-4">Grupos ordenados pela <strong>Prioridade Média</strong> das solicitações.</p>
+                    <div class="max-h-[500px] overflow-y-auto border border-gray-200 rounded-lg">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-slate-50 sticky top-0">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider w-16">Nº</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Grupo</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider w-24">Unidades</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider w-24">Prioridade Média</th>
+                                </tr>
+                            </thead>
+                            <tbody id="commonRequestsList" class="bg-white divide-y divide-gray-200">
+                                <tr><td colspan="4" class="p-4 text-center text-slate-500">Calculando...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- Pedidos Específicos -->
+                <div class="bg-white border border-gray-200 shadow-sm rounded-xl p-6">
+                    <h3 class="text-xl font-semibold text-slate-700 mb-4">Pedidos Específicos (1-2 Unidades)</h3>
+                    <p class="text-sm text-slate-500 mb-4">Grupos ordenados pela <strong>Prioridade Média</strong> das solicitações.</p>
+                    <div class="max-h-[500px] overflow-y-auto border border-gray-200 rounded-lg">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-slate-50 sticky top-0">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider w-16">Nº</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Grupo</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider w-24">Unidades</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider w-24">Prioridade Média</th>
+                                </tr>
+                            </thead>
+                            <tbody id="specificRequestsList" class="bg-white divide-y divide-gray-200">
+                                <tr><td colspan="4" class="p-4 text-center text-slate-500">Calculando...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detalhe por Unidade -->
+            <div class="bg-white border border-gray-200 shadow-sm rounded-xl p-6">
+                <h3 class="text-xl font-semibold text-slate-700 mb-4">Detalhamento por Unidade</h3>
+                <div class="max-h-[500px] overflow-y-auto border border-gray-200 rounded-lg">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-slate-50 sticky top-0">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Unidade</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Grupos Solicitados</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Soma das Prioridades</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Prioridade Média</th>
+                            </tr>
+                        </thead>
+                        <tbody id="unitDetailsList" class="bg-white divide-y divide-gray-200">
+                            <tr><td colspan="4" class="p-4 text-center text-slate-500">Calculando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Modal de Perfil/Unidade -->
+    <div id="profileModal" class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center z-50 hidden no-print">
+        <div class="bg-white rounded-xl shadow-2xl p-8 m-4 max-w-lg w-full">
+            <h2 class="text-2xl font-semibold text-slate-700 mb-2">Bem-vindo!</h2>
+            <p class="text-slate-600 mb-6">Por favor, selecione sua unidade (Secretaria/Setor) para continuar.</p>
+            <form id="profileForm" class="space-y-4">
+                <div>
+                    <label for="unitNameSelect" class="block text-sm font-medium text-slate-600">Minha Unidade</label>
+                    <select id="unitNameSelect" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+                        <option value="">Selecione...</option>
+                        <!-- Opções adicionadas por JS -->
+                    </select>
+                </div>
+                <div class="flex justify-end gap-4 pt-4">
+                    <button type="button" id="profileModalCancel" class="bg-white hover:bg-slate-50 text-slate-700 font-medium py-2 px-4 rounded-lg border border-gray-300 shadow-sm transition-colors">Cancelar</button>
+                    <button type="submit" class="bg-blue-800 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg shadow-sm transition-colors">Salvar e Continuar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Modal de Confirmação de Deleção -->
+    <div id="deleteConfirmModal" class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center z-50 hidden no-print">
+        <div class="bg-white rounded-xl shadow-2xl p-8 m-4 max-w-md w-full">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="p-3 rounded-full bg-red-100 text-red-600">
+                    <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+                </div>
+                <h2 class="text-2xl font-semibold text-slate-700">Confirmar Exclusão</h2>
+            </div>
+            <p class="text-slate-600 mb-6">
+                Você tem certeza que deseja excluir o grupo: <strong id="groupNameToDelete"></strong>?
+                <br>
+                Todas as solicitações associadas a ele também serão excluídas.
+            </p>
+            <div class="flex justify-end gap-4">
+                <button type="button" id="cancelDelete" class="bg-white hover:bg-slate-50 text-slate-700 font-medium py-2 px-4 rounded-lg border border-gray-300 shadow-sm transition-colors">Cancelar</button>
+                <button type="button" id="confirmDelete" class="bg-red-600 hover:bg-red-500 text-white font-medium py-2 px-4 rounded-lg shadow-sm transition-colors">Sim, Excluir</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação de Importação -->
+    <div id="importConfirmModal" class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center z-50 hidden no-print">
+        <div class="bg-white rounded-xl shadow-2xl p-8 m-4 max-w-lg w-full">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="p-3 rounded-full bg-indigo-100 text-indigo-600">
+                    <i data-lucide="file-up" class="w-6 h-6"></i>
+                </div>
+                <h2 class="text-2xl font-semibold text-slate-700">Conflito de Importação</h2>
+            </div>
+            <p class="text-slate-600 mb-4" id="importConflictMessage">
+                Alguns grupos no arquivo CSV já existem no sistema.
+            </p>
+            <p class="text-sm text-slate-500 mb-6 bg-slate-50 p-3 rounded-lg">
+                Deseja <strong>sobrescrever</strong> os nomes dos grupos existentes com os dados do arquivo ou importar <strong>apenas os novos</strong>?
+            </p>
+            <div class="flex flex-col sm:flex-row justify-end gap-3">
+                <button type="button" id="btnImportCancel" class="bg-white hover:bg-slate-50 text-slate-700 font-medium py-2 px-4 rounded-lg border border-gray-300 shadow-sm transition-colors">
+                    Cancelar
+                </button>
+                <button type="button" id="btnImportSkipExisting" class="bg-blue-600 hover:bg-blue-500 text-white font-medium py-2 px-4 rounded-lg shadow-sm transition-colors">
+                    Apenas Novos
+                </button>
+                <button type="button" id="btnImportOverwrite" class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2 px-4 rounded-lg shadow-sm transition-colors">
+                    Importar Tudo (Sobrescrever)
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Firebase e Script da Aplicação -->
+    <script type="module">
+        // Importações do Firebase
+        import { initializeApp as initializeAppFirebase } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { 
+            getFirestore, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, 
+            onSnapshot, collection, query, where, writeBatch, getDocs, setLogLevel
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Configuração do Firebase (usando variáveis globais injetadas)
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // Inicializa Firebase
+        const app = initializeAppFirebase(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        setLogLevel('Debug'); // Habilita logs detalhados do Firestore
+
+        // Constantes Globais
+        const YEAR = "2026";
+        const ADMIN_UNIT_NAME = "Secretaria de Fazenda";
+        const SECRETARIAS_LIST = [
+            "Gabinete do Prefeito", "Controladoria", "Procuradoria", "Consultoria Jurídica",
+            "Secretaria de Administração", "Secretaria de Fazenda", "Secretaria de Cultura, Desporto, Lazer e Turismo",
+            "Secretaria de Planejamento, Orçamento e Gestão", "Secretaria de Saúde", "Secretaria de Educação",
+            "Secretaria de Obras", "Assessoria de Assuntos Estratégicos", "Secretaria Agronegócio",
+            "Secretaria de Assistência Social", "Secretaria de Meio ambiente", "Secretaria de Governo"
+        ];
+        
+        // LISTA ATUALIZADA - Processada para ter apenas os 3 últimos dígitos
+        const DEFAULT_GROUPS_RAW = [
+            ['000400', 'MATERIAL DE INFORMATICA'], ['000401', 'PEÇAS PARA VEÍCULO'], ['000402', 'CONTRATAÇÃO PRESTAÇÃO DE SERVIÇOS LABORATORIAIS'],
+            ['000403', 'CONTR. PREST. SERV. DE MÉDIA E ALTA COMPLEXIDADE AMBULATORIAL'], ['000404', 'MATERIAL ELETRICO ELETRÔNICO'], ['000405', 'SERVIÇO DE CÓPIAS'],
+            ['000406', 'MANUTENÇÃO DE VEICULOS - FROTA MECANIZADA'], ['000407', 'CONFECÇÃO DE IMPRESSOS DE USO CONTÍNUO'], ['000408', 'MATERIAL DE ESCRITORIO'],
+            ['000409', 'ACESSÓRIO PARA VEÍCULO'], ['000410', 'GÁS LIQUEFEITO DE PETRÓLEO - GLP'], ['000411', 'COMBUSTÍVEL AUTOMOTIVO'], ['000412', 'GÊNEROS ALIMENTÍCIOS'],
+            ['000413', 'CONFECÇÃO DE IMPRESSOS DE USO ESPECIAL'], ['000414', 'CONFECÇÃO DE IMPRESSOS TÉCNICOS COM CÓDIGO'], ['000415', 'CONFECÇÃO DE PLACA OU TARJETA PARA VEÍCULO'],
+            ['000416', 'SERVIÇO DE ALINHAMENTO E BALANCEAMENTO D'], ['000417', 'CORTINAS EM PERSIANAS E TECIDOS'], ['000418', 'CONFECÇÃO DE FAIXAS E ESCRITA TIPO LETREIRO'],
+            ['000419', 'ALIMENTAÇÃO PARA ATLETAS EM JOGOS FESTIVOS'], ['000420', 'ALUGUEL DE OUTDOOR'], ['000421', 'APARELHO DE MEDIÇÃO E ORIENTAÇÃO'],
+            ['000422', 'APARELHO E EQUIPAMENTO DE COMUNICAÇÃO'], ['000423', 'SERVIÇO DE ENCADERNAÇÃO DE DOCUMENTOS'], ['000424', 'ARDÓSIA'], ['000425', 'AREIA'],
+            ['000426', 'ARTEFATOS CONCRETO PREMOLDADOS'], ['000427', 'ARTEFATOS DE FERRO'], ['000428', 'ARTIGO DE CAMA MESA E BANHO'], ['000429', 'ASSINATURA DE JORNAIS'],
+            ['000430', 'ASSINATURA DE REVISTAS BOLETINS'], ['000431', 'AUXILIO FUNERAL'], ['000432', 'BANDEIRA MASTRO E FLÂMULA'], ['000433', 'BICICLETA'],
+            ['000434', 'BRINQUEDOS'], ['000435', 'BRITA'], ['000436', 'EQUIPAMENTO PARA REPRODUÇÃO DE CÓPIAS'], ['000437', 'CARIMBO E SUPRIMENTOS PARA CARIMBO'],
+            ['000438', 'CARTEIRA FUNCIONAL E CEDULA'], ['000439', 'CIMENTO'], ['000441', 'MANUTENÇÃO DE MOTOS'], ['000442', 'RETÍFICA EM MOTOR - FROTA MECANIZADA'],
+            ['000443', 'CONFECÇÃO DE UNIFORMES'], ['000444', 'CONFECÇÃO E COLOCAÇÃO DE ADESIVO TIPO SILK'], ['000445', 'CONGRESSOS,CONFERÊNCIAS, SEMINÁRIOS, CURSOS, EVENTOS E AFINS'],
+            ['000446', 'CONTR. PREST. SERV. DE ARQUITETURA'], ['000447', 'CONTR. PREST. SERV. DE REDE DE INFORMÁTICA'], ['000448', 'CONTR.PREST. SERV. EXAMES PARA APOIO DIAGNÓSTICO'],
+            ['000449', 'ELETRODOMÉSTICO'], ['000450', 'CONTRATAÇÃO DE SHOWS MUSICAIS'], ['000451', 'EQUIPAMENTO DE ÁUDIO E VÍDEO'], ['000452', 'EQUIPAMENTO DE INFORMÁTICA'],
+            ['000453', 'EQUIPAMENTO ESPORTIVO'], ['000454', 'EQUIPAMENTO INDUSTRIAL'], ['000455', 'EQUIPAMENTO MÉDICO-HOSPITALAR'], ['000456', 'EQUIPAMENTO ODONTOLÓGICO'],
+            ['000457', 'EQUIPAMENTO PARA FISIOTERAPIA'], ['000458', 'EQUIPAMENTO PARA LABORATÓrio'], ['000459', 'EQUIPAMENTO PARA OFICINA'],
+            ['000460', 'EQUIPAMENTO PARA PARQUE INFANTIL'], ['000461', 'EQUIPAMENTO DE RADIOFUSÃO'], ['000462', 'EQUIPAMENTO PARA USINA ASFÁLTICA'],
+            ['000463', 'EQUIPAMENTO DE PROTEÇÃO INDIVIDUAL'], ['000464', 'EQUIPAMENTOS E ACESSORIOS PARA LIMPEZA'], ['000465', 'EQUIPAMENTOS ELÉTRICO ELETRÔNICO'],
+            ['000466', 'MADEIRA'], ['000467', 'FERRAGEM'], ['000468', 'FERRAMENTA'], ['000469', 'FILTROS PARA VEÍCULO'], ['000470', 'MATERIAL DE HIGIENE PESSOAL'],
+            ['000471', 'GENEROS NUTRICIONAIS'], ['000472', 'GRADE, JANELA, PORTA E BASCULANTE'], ['000473', 'INSTRUMENTO MEDICO-HOSPITALAR'],
+            ['000474', 'INSTRUMENTO ODONTOLÓGICO'], ['000475', 'LANCHE'], ['000476', 'MATERIAL DE CARPINTARIA'], ['000478', 'LOCAÇÃO DE BARRACAS E TENDAS'],
+            ['000479', 'LOCAÇÃO DE IMÓVEL'], ['000480', 'LOCAÇÃO DE MÁQUINAS E EQUIP. MEDICO-HOSP.'], ['000481', 'LUBRIFICANTE AUTOMOTIVO'],
+            ['000482', 'MEDICAMENTOS (USO GERAL)'], ['000483', 'LOCAÇÃO DE FOTOCOPIADORA/IMPRESSORAS'], ['000484', 'MANUTENÇÃO E CONSERTO DE EQUIPAMENTOS DE COMUNICAÇÃO'],
+            ['000485', 'MANUTENÇÃO/CONSERTO EM ELETRODOMÉSTICO'], ['000486', 'MANUTENÇÃO/CONSERTO EQUIP.ELETRICO-ELETRONICO'], ['000487', 'MANUTENÇÃO/CONSERTO EQUIP.ESCRITÓRIO'],
+            ['000488', 'MANUTENÇÃO/CONSERTO EQUIP.INFORMÁTICA'], ['000489', 'CONTR.PREST.SERV.MANUTENÇÃO/CONSERTO EQUIP. LABORATÓRIO'], ['000490', 'MAQUINAS PESADAS'],
+            ['000491', 'PLANTAS ORNAMENTAIS'], ['000492', 'CONFECÇÃO DE PLACAS COMEMORATIVAS'], ['000493', 'MATERIAL DE CONSTRUÇÃO'], ['000494', 'VIDROS E ACESSÓRIOS'],
+            ['000495', 'PAGAMENTOS NOTORIAIS'], ['000496', 'SERVIÇO DE CHAVEIRO'], ['000497', 'SERVIÇO DE RECARGA DE EXTINTOR'],
+            ['000498', 'ACESSORIO/MATERIAL DE AUDIO E VIDEO'], ['000499', 'REVELAÇÃO E CÓPIA DE FILMES'], ['000500', 'MATERIAL DE COPA E COZINHA'],
+            ['000501', 'MATERIAL DE ENFERMAGEM'], ['000502', 'MERENDA ESCOLAR'], ['000503', 'GASES INDUSTRIAIS'], ['000504', 'MATERIAL E PEÇAS P/ ELETRODOMÉSTICOS'],
+            ['000505', 'MATERIAL E PEÇAS P/ REPAROS EM MOTOSSERRA'], ['000506', 'ACESSÓRIO PARA APARELHO E/OU EQUIPAMENTO DE COMUNICAÇÃO'],
+            ['000507', 'MATERIAL DE LIMPEZA AUTOMOTIVA'], ['000508', 'MATERIAL E PEÇAS P/ USINA LAMA ASFÁLTICA'], ['000509', 'TELECOMUNICAÇÃO'],
+            ['000510', 'MATERIAL, EQUIPAMENTO E PEÇAS P/ INSTRUMENTOS MUSICAIS'], ['000511', 'MATERIAL HIDRÁULICO'], ['000512', 'MATERIAL ODONTOLÓGICO'],
+            ['000513', 'SERVIÇO DE CAPOTEIRO'], ['000514', 'PEÇAS E ACESSÓRIOS P/ EQUIP. ODONTOLÓGICO'], ['000515', 'SEGURO DE VEÍCULO'],
+            ['000516', 'SERVIÇO DE LOCAÇÃO DE VEÍCULOS'], ['000517', 'CONTRAT. PREST. SERV. P/ COLETA DE LIXO'], ['000518', 'SERVIÇOS AUDITORIA, ASSESSORIA E CONSULTORIA'],
+            ['000519', 'ÁGUA MINERAL'], ['000520', 'EQUIPAMENTO HIDRAULICO'], ['000521', 'AUXILIO ALIMENTAÇÃO'],
+            ['000522', 'MATERIAL P/ ACONDICIONAMENTO, EMBALAGEM E PROTEÇÃO'], ['000523', 'MATERIAL P/ FESTIVIDADE E SOLENIDADES'],
+            ['000524', 'EQUIPAMENTO E MATERIAL PARA FISIOTERAPIA'], ['000525', 'MATERIAL PARA FOTOGRAFIA'], ['000526', 'MATERIAL P/ LANTERNAGEM E PINTURA'],
+            ['000527', 'MATERIAL P/ MANUTENÇÃO DE BENS IMÓVEIS'], ['000528', 'MATERIAL P/ OFICINAS TERAPÊUTICAS'], ['000529', 'MATERIAL P/ PESQUISA E CONTROLE DE VETOR'],
+            ['000530', 'MATERIAL P/ SANEAMENTO BÁSICO'], ['000531', 'MATERIAL QUÍMICO'], ['000532', 'MATERIAL DE LABORATORIO'], ['000533', 'MEDALHAS E TROFÉUS'],
+            ['000534', 'MATERIAL DE PINTURA'], ['000535', 'MEDICAMENTOS (USO VETERINÁRIO)'], ['000536', 'MOBÍLIA'], ['000537', 'MOBILIÁRIO ESCOLAR'],
+            ['000538', 'MOBILIÁRIO PARA ESCRITÓRIO'], ['000539', 'MATERIAL DE LIMPEZA GERAL'], ['000540', 'SERVIÇO DE ENGENHARIA'],
+            ['000541', 'EQUIPAMENTOS E ACESSÓRIOS PARA MANUTENÇÃO DO TRÂNSITO'], ['000542', 'PNEUS, CÂMARAS E PROTETORES'], ['000543', 'MOBILIÁRIO PARA LABORATÓRIO'],
+            ['000544', 'OBRAS DE CONSTRUÇÃO CIVIL E ENGENHARIA'], ['000545', 'PASSAGENS E PASSES'], ['000546', 'PEÇAS E ACESSÓRIOS P/ EQUIP. MED.HOSPITALAR'],
+            ['000547', 'CONTR. PREST. SERV. LOCAÇÃO VEICULO PROPAGANDA VOLANTE'], ['000548', 'SERVIÇO DE SONORIZAÇÃO'], ['000549', 'PEÇAS E SUPRIMENTOS DE INFORMÁTICA'],
+            ['000550', 'SERVIÇO DE TRANSPORTE ESCOLAR'], ['000551', 'SUPRIMENTOS PARA EQUIPAMENTOS MÉDICOS HOSPITALAR'], ['000553', 'HERBICIDAS'],
+            ['000554', 'SERVIÇO DE SERRALHEIRO'], ['000555', 'MATERIAL DE SINALIZAÇÃO VISUAL'], ['000556', 'ACUMULADORES P/EQUIP. ELETROELETRÔNICOS'],
+            ['000557', 'SERVIÇO AUTO-ELÉTRICO - FROTA MECANIZADA'], ['000558', 'PEÇAS E MATERIAIS PARA MOTOS E BICICLETAS'], ['000559', 'MATERIAL DE DESENHO TÉCNICO'],
+            ['000560', 'EQUIPAMENTO AGRÍCOLA'], ['000561', 'SERVIÇO DE LETREIRO'], ['000562', 'MATERIAL DE SEGURANÇA'], ['000563', 'GASES MEDICINAIS'],
+            ['000564', 'RENOVAÇÃO DE ASSINATURA'], ['000565', 'MANUTENÇÃO/CONSERTO EQUIP. P/ FISIOTERAPIA'], ['000566', 'ACESSÓRIOS PARA EQUIPAMENTOS ELETRÔNICOS'],
+            ['000567', 'CONTR. PREST. SERV. ESPETÁCULO PIROTÉCNICO'], ['000568', 'CONTR. SERV. DE BUFFET'], ['000569', 'CONTR. PREST. SERV.MÉDIC. ESPECIALIZADO'],
+            ['000570', 'SERVIÇO ESPECIALIZADO PARA IMPLANTAÇÃO DE CONJUNTO SEMAFÓRICO'], ['000571', 'VEÍCULOS LEVES/UTILITÁRIOS'],
+            ['000572', 'SERVIÇO DE SILKAGEM E BORDADO'], ['000573', 'TIJOLO'], ['000574', 'PEÇAS PARA MÁQUINAS PESADAS'], ['000575', 'ACESSÓRIOS PARA MÁQUINAS PESADAS'],
+            ['000576', 'MATERIAIS PARA JARDIM'], ['000577', 'PEÇAS E ACESSÓRIOS P/EQUIP. LABORATÓRIO'], ['000578', 'CONTRATAÇÃO DE LOCAÇÃO DE VEÍCULOS'],
+            ['000579', 'TELHA'], ['000580', 'MATERIAL E PEÇAS PARA REPAROS EM ROÇADEIRA'], ['000581', 'SERVIÇO TÉCNICO ESPECIALIZADO'],
+            ['000582', 'LIVRO DIDÁTICO E PEDAGÓGICO'], ['000583', 'MATERIAL DIDÁTICO E PEDAGÓGICO'], ['000584', 'MATERIAL DE DIVULGAÇÃO DE CAMPANHA'],
+            ['000585', 'SERVIÇO DE COLETA DE LIXO HOSPITALAR'], ['000586', 'PRESTAÇÃO DE SERVIÇOS PARA REMOÇÃO DE PACIENTES'], ['000587', 'SERVIÇO DE MOLEIRO'],
+            ['000588', 'PEÇAS E ACESSÓRIOS PARA TELEFONIA FIXA E MÓVEL'], ['000589', 'MATERIAL DE PAVIMENTAÇÃO ASFÁLTICA'], ['000590', 'SERVIÇO DE ELETRICISTA'],
+            ['000591', 'RETÍFICA EM MOTOR - FROTA MECANIZADA'], ['000592', 'PAGAMENTO DE FRANQUIA'], ['000593', 'CONTR.PREST.SERV.PRONTO ATENDIMENTO'],
+            ['000594', 'ACUMULADORES'], ['000595', 'EQUIPAMENTOS E ACESSÓRIOS PARA CONJUNTO SEMAFÓRICO'], ['000596', 'SERVIÇO DE FERREIRO'],
+            ['000597', 'MANUTENÇAO DE CORTINAS E PERSIANAS'], ['000598', 'SERVIÇO DE BOMBEIRO HIDRÁULICO'], ['000599', 'SERVIÇOS DE MARCENARIA'],
+            ['000600', 'SERVIÇO DE CARGA EM EQUIP. DE REFRIGERAÇÃO RESIDENCIAL, COMERCIAL E INDUSTRIAL'], ['000601', 'EQUIPAMENTOS DE SEGURANÇA'],
+            ['000602', 'PLACAS INDICATIVAS'], ['000603', 'CONTRATAÇÃO DE PRESTAÇÃO DE SERVIÇOS DE CONGRESSOS,CONFERÊNCIAS, SEMINÁRIOS, CURSOS, EVENTOS E AFINS'],
+            ['000604', 'CERTIFICADOS E LAUDOS TÉCNICOS'], ['000605', 'CONTRATAÇÃO DE PRESTAÇÃO DE SERVIÇO DE SEGURANÇA, VIGILÂNCIA E MONITORAMENTO'],
+            ['000606', 'AQUISIÇÃO DE ARTIGOS DE CAMA, MESA, BANHO, VESTUÁRIO HOSPITALAR E AFINS'], ['000607', 'CONFECÇÃO DE ARTIGOS DE CAMA, MESA, BANHO, VESTUÁRIO HOSPITALAR E AFINS'],
+            ['000608', 'CONTR. PREST. SERVIÇO DE INTERNET'], ['000609', 'ARTIGOS PARA BERCÁRIO'], ['000610', 'FERRAMENTA ELÉTRICA'], ['000611', 'PUBLICAÇÃO'],
+            ['000612', 'ACESSÓRIOS E PERIFÉRICOS DE INFORMÁTICA'], ['000613', 'QUADRO, PAINEL E MOLDURA'], ['000614', 'SERVIÇOS PARA RETIFICAÇÃO E TRANSMISSÃO DE GFIPS.'],
+            ['000615', 'SERVIÇO ELETRICO-ELETRONICO'], ['000616', 'EQUIPAMENTOS URBANOS'], ['000617', 'SERVIÇO DE SEGURANÇA P/ ACOMPANHAMENTO'],
+            ['000618', 'CONTR.PREST.SERV.C/ LOCAÇÃO'], ['000619', 'SERVIÇO DE BORRACHEIRO'], ['000620', 'SERVIÇO DE REBOQUE'],
+            ['000621', 'SERV. DE LAVAÇÃO DE VEÍCULOS E ACESSÓRIO'], ['000622', 'SERVIÇO DE MANUTENÇÃO E RECAUCHUTAGEM'], ['000623', 'UTENSÍLIOS PARA LIMPEZA'],
+            ['000624', 'EQUIPAMENTO PARA ABASTECIMENTO DE COMBUSTÍVEL'], ['000625', 'EQUIPAMENTO PARA ESCRITORIO'], ['000626', 'CONTR. PREST. SERV. DE LAVANDERIA'],
+            ['000627', 'MATERIAL DE OFICINA'], ['000628', 'SOFTWARE'], ['000629', 'MATERIAL ORTOPÉDICO'], ['000630', 'SERVIÇOS DE DESPACHANTE'],
+            ['000631', 'BAR E RESTAURANTE'], ['000632', 'INSUMOS PARA INSPEÇÃO DE PRODUTOS DE ORIGEM ANIMAL E VEGETAL'],
+            ['000633', 'CONTR. PREST. SERV. ESPECIALIZADOS EM LOCAÇÃO DE ESTRUTURAS PARA EVENTOS'], ['000634', 'MATERIAL E PEÇAS P/ REPOSIÇÃO EM EQUIPAMENTOS'],
+            ['000635', 'MANUTENÇÃO DE SINALIZAÇÃO VIÁRIA'], ['000636', 'CONTR. PREST. SERV. DE "HOME PAGE" (SITES)'], ['000637', 'SERVIÇO DE LANTERNAGEM E PINTURA'],
+            ['000638', 'PEÇAS E ACESSÓRIOS PARA EQUIPAMENTO AGRÍCOLA'], ['000639', 'CONTRATAÇÃO DE PRESTAÇÃO DE SERVIÇO DE SEGURANÇA'],
+            ['000640', 'SERVIÇO PARA AFERIÇÃO E CALIBRAÇÃO DE EQUIPAMENTO'], ['000641', 'CONTR. PREST. SERV. DE TOPOGRAFIA'],
+            ['000642', 'CONTRAT. DE EMPRESA P/ FORNEC. E INST.DE POÇO ARTESIANO'], ['000643', 'REFEIÇOES PRONTAS (MARMITEX)'],
+            ['000644', 'VESTUÁRIOS ESPECIAIS P/ CAMPANHA'], ['000645', 'VEÍCULOS DE TRANSPORTE RODOVIÁRIO'], ['000646', 'MANUTENÇÃO/CONSERTO DE EQUIPAMENTO MÉDICO-HOSPITALAR'],
+            ['000647', 'SINALIZADORES PARA AEROPORTO'], ['000648', 'AQUISIÇÃO DE BARRACAS E TENDAS'], ['000649', 'CONTRATAÇÃO DE EMPRESA PARA INTERNAÇÃO INVOLUNTÁRIA DE PACIENTES'],
+            ['000650', 'PEÇAS PARA COMPACTADOR DE LIXO'], ['000651', 'MANUTENÇÃO DE COMPACTADOR DE LIXO'], ['000653', 'VEICULOS PESADOS'], ['000654', 'SEGURO DE VIDA'],
+            ['000656', 'SERVIÇOS DE VIDRAÇARIA'], ['000657', 'SERVIÇO DE SELEÇÃO E TREINAMENTO'], ['000658', 'PRODUTOS, SERVIÇOS POSTAIS E TELEMÁTICOS'],
+            ['000659', 'SERVIÇOS TECNICOS EM REDES WIRELESS'], ['000660', 'MATERIAL DE USO AGRÍCOLA'], ['000661', 'PUBLICIDADE E PROPAGANDA'],
+            ['000662', 'CONTRATAÇÃO DE SERVIÇOS DE ESTRUTURA DE APOIO E SHOWS MUSICAIS'], ['000663', 'ADITIVO AUTOMOTIVO'],
+            ['000664', 'FORMAS PARA CONFECÇÃO DE PEÇAS PRÉ-MOLDADAS'], ['000665', 'FOTOGRAFIAS E FILMAGENS AEREAS'], ['000666', 'EQUIPAMENTOS P/ PARQUES E JARDINS'],
+            ['000667', 'REFORMA DE CARROCERIA'], ['000668', 'MATERIAL PARA CARROCERIA'], ['000669', 'MOBILIÁRIO URBANO'], ['000670', 'MATERIAL DE PROTEÇÃO'],
+            ['000671', 'CONSERTO EM EQUIPAMENTO ODONTOLÓGICO'], ['000672', 'MATERIAL PARA SEGURANÇA PATRIMONIAL DE BENS IMOVEIS'], ['000673', 'PASSAGEM AÉREA'],
+            ['000674', 'MATERIAIS E ACESSÓRIOS PARA SINALIZAÇÃO VIÁRIA'], ['000675', 'PERMISSAO DE USO'], ['000676', 'EQUIPAMENTO PARA TOPOGRAFIA'],
+            ['000677', 'LOCAÇÃO DE MÁQUINAS E EQUIPAMENTOS'], ['000678', 'SERVIÇOS DE SINALIZAÇÃO VIÁRIA'], ['000679', 'SERVIÇO DE TRANSPORTE'],
+            ['000680', 'CONTR. PREST. SERV. P/MANUTENÇÃO/CONSERTO EQUIP. ODONTOLÓGICO'], ['000681', 'ACESSÓRIOS PARA BORRACHARIA'],
+            ['000682', 'CONJUNTO DE MONITORAMENTO POR CÂMERAS'], ['000683', 'AQUISIÇÃO DE PLACAS COMEMORATIVAS'], ['000684', 'SERVIÇOS DE INSTALAÇÃO DE CÂMERAS E SOFTWARES'],
+            ['000685', 'EQUIPAMENTOS E ACESSÓRIOS DE USO VETERINÁRIO'], ['000686', 'MATERIAL DE USO VETERINÁRIO'], ['000687', 'LIVRO'],
+            ['000688', 'MATERIAL PARA DIVULGAÇÃO DE EVENTOS'], ['000689', 'CONTR. PREST. SERV. FILMAGEM/EDIÇÃO'], ['000690', 'MATERIAL DE SINALIZAÇÃO HORIZONTAL'],
+            ['000691', 'SERVIÇO DE TORNEARIA'], ['000692', 'CONTR. PREST. SERV. P/MANUTENÇÃO/CONSERTO EQUIP. MÉDICO-HOSPITALAR'], ['000693', 'SEGURANÇA DESARMADA'],
+            ['000694', 'ARTIGOS E UTENSILIOS DE ESCRITORIOS, DIDÁTICOS E PSICOLOGICOS'], ['000695', 'MAQUINAS E EQUIPAMENTOS DE OFICINAS EM GERAL'],
+            ['000696', 'POSTES P/ APLICACAO EM CERCA DE ARAME'], ['000697', 'LOCAÇÃO DE INFRAESTRUTURA DE REDE OPTICA'], ['000698', 'AUXILIO ALIMENTAÇÃO'],
+            ['000699', 'VEDANTES E ADESIVOS'], ['000700', 'CONTRAT. PREST. SERV. DE MÁQ. MOTOMECANIZADAS'], ['000701', 'CONTR. PREST. SERV. PARA ATENDIMENTO HOSPITALAR'],
+            ['000702', 'CREDENCIAMENTO DE LEILOEIRO'], ['000703', 'CONCRETO USINADO'], ['000704', 'CONTR. DE EMPRESA PARA ELABORAÇÃO DE PLANO MUNICIPAL DE MOBILIDADE URBANA'],
+            ['000705', 'MATERIAL PARA ABATEDOURO'], ['000706', 'PREST. DE SERV. MANUTENÇÃO E GERENCIAMENTO DE TRANSPORTE DE SAÚDE'],
+            ['000707', 'TRANSPORTE DE PESSOAS'], ['000708', 'MANUTENÇÃO DE BENS IMÓVEIS'], ['000709', 'MOBILIÁRIOS EM GERAL'],
+            ['000710', 'SERVIÇO DE PESQUISA, AVALIAÇÃO E PLANEJAMENTO DE AÇÕES E METAS DE GOVERNO'], ['000711', 'PACOTE DE VIAGEM'],
+            ['000712', 'MATERIAL E PEÇAS P/ REPOSIÇÃO EM EQUIPAMENTOS DE PARQUES E JARDINS.'], ['000713', 'CONT PREST.SERV.DE VIGILANCIA NO TRANSPORTE DE BENS E VALORES'],
+            ['000714', 'CONTRATAÇÃO DE INSTITUIÇÃO FINANCEIRA'], ['000715', 'MANUTENÇÃO EM EQUIPAMENTOS DE PARQUES E JARDINS'], ['000716', 'PLACAS E TARJETAS PARA VEÍCULO'],
+            ['000717', 'PLACAS COMEMORATIVAS'], ['000718', 'PRODUTO LÚDICO INFANTIL'], ['000719', 'CONTRATAÇÃO DE SERVIÇOS DE TRADUÇÃO DE TEXTOS'],
+            ['000720', 'EQUIPAMENTO PARA PINTURA VIÁRIA'], ['000721', 'VEÍCULOS ESPECIAIS'], ['000722', 'CONTR. PREST. SERV.FILMAGEM/EDIÇÃO FITAS'],
+            ['000723', 'CONTRATAÇÃO DE EMPRESA PARA FORNECIMENTO E MONTAGEM DE EQUIPAMENTOS DO MATADOURO MUNICIPAL'], ['000724', 'LOCAÇÃO DE EQUIPAMENTO'],
+            ['000725', 'ASSINATURA DIGITAL'], ['000726', 'MATERIAL ESPORTIVO'], ['000727', 'VIGILÂNICA PATRIMONIAL'], ['000728', 'SIMBOLO OLÍMPICO'],
+            ['000729', 'MATERIAL PARA PAVIMENTAÇÃO ASFALTICA/CONSTRUÇÃO EM GERAL'], ['000730', 'MATERIAL MEDICO-HOSPITALAR'],
+            ['000731', 'CONTR. PREST. SERV. DE HOSPEDAGEM/MORADIA ASSISTIDA'], ['000732', 'CONTRAT. DE EMPRESA P/ FORNEC. E INST.DE POÇO ARTESIANO'],
+            ['000733', 'MATERIAIS DE ESCRITÓRIO E DIDÁTICO PEDAGOGICO'], ['000734', 'GASES MEDICINAIS/LOCAÇÃO EQUIPAMENTOS MEDICOS HOSPITALARES'],
+            ['000735', 'PUBLICAÇÕES JUDICIAIS'], ['000736', 'ADITIVOS, MATERIAIS PARA LIMPEZA E LUBRIFICANTE AUTOMOTIVO'], ['000737', 'EQUIPAMENTO DE COMUNICAÇÃO'],
+            ['0J0738', 'EQUIPAMENTO PARA ABATEDOURO'], ['000739', 'HOSPEDAGEM'], ['000740', 'DISPONIBILIZAÇÃO DE INFRAESTRUTURA DE REDE OPTICA'],
+            ['000741', 'LOCAÇÃO DE BANHEIROS QUIMICOS'], ['000742', 'COBERTURA PARA CURATIVOS'], ['000743', 'EQUIPAMENTO PARA VEICULO'],
+            ['000744', 'EQUIPAMENTOS PARA VEÍCULOS'], ['000745', 'SERVIÇO ESPECIALIZADO DE BRIGADISTA/SOCORRISTA'],
+            ['000746', 'INSTALAÇÃO DE CORTINAS EM PERSIANAS E TECIDOS'], ['000747', 'PREST. SERV. P/ ELABORAÇÃO DE DIAGNÓSTICO ESPELEOLÓGICO DO MATADOURO MUNICIPAL'],
+            ['000748', 'PEÇAS E ACESSÓRIOS P/ EQUIPAMENTOS ELÉTRICOS'], ['000749', 'VEICULAÇÃO DE PUBLICIDADE ATRAVES DE CARRO DE SOM'],
+            ['000750', 'ACESSÓRIO PARA APARELHO E/OU EQUIPAMENTO DE COMUNICAÇÃO'], ['000751', 'INSTRUMENTOS MUSICAIS'],
+            ['000752', 'CONTR. SERV. DE IMPRESSÃO E CÓPIAS DE DOCUMENTOS'], ['000753', 'MANUTENÇÃO/INSTALAÇÃO DE BENS MOVEIS'],
+            ['000754', 'CAPACITAÇÃO P/ PILOTAGEM DE EQUIPAMENTO AEREO NAO TRIPULADO'], ['000755', 'CONTR. PREST. SERVIÇOS DE SEGURANÇA DESARMADA E VIGILÂNCIA PATRIMONIAL'],
+            ['000756', 'EQUIPAMENTO P/ ARMAZENAMENTO DE MATERIAL BETUMINOSO'], ['000757', 'BIBLIOTECA DIGITAL'], ['000758', 'MAQUINAS E EQUIPAMENTOS INDUSTRIAIS ESPECIALIZADOS'],
+            ['000759', 'PLANTAS ORNAMENTAIS E ACESSÓRIOS PARA JARDINAGEM'], ['000760', 'MATERIAL E PEÇAS P/ REPOSIÇÃO EM FONTE LUMINOSA'],
+            ['000761', 'MANUTENÇÃO EM MATERIAIS E EQUIPAMENTOS CONTRA INCÊNDIO'], ['000762', 'MATERIAL PARA EDUCAÇÃO NUTRICIONAL'],
+            ['000763', 'CONTRATAÇÃO DE CUIDADORES DE PESSOAS COM NECESSIDADES ESPECIAIS'], ['000764', 'SERVIÇOS GRÁFICOS PARA IMPRESSÃO'],
+            ['000765', 'ACESSÓRIOS PARA OFICINA'], ['000766', 'EQUIPAMENTOS PARA MONITORAMENTO'], ['000767', 'INVENTÁRIO E LOCALIZAÇÃO PATRIMONIAL'],
+            ['000768', 'EQUIPAMENTOS MECÂNNICOS E ELETRÔNICOS'], ['000769', 'CONTRATAÇÃO DE SERVIÇO DE TRANSPORTE'],
+            ['000770', 'EQUIPAMENTOS DE CAPTAÇÃO E GRAVAÇÃO DE ÁUDIO E VÍDEO'], ['000771', 'CONCESSÃO DE BENS PÚBLICOS'],
+            ['000772', 'ADAPTAÇÃO EM ESTRUTURA VEICULAR'], ['000773', 'SERVIÇO DE COBRANÇA AUTOMÁTICA DE TARIFA DE PEDÁGIO'], ['000774', 'MODELOS ANATÔMICOS'],
+            ['000775', 'CONTRATAÇÃO DE EMPRESA PARA PRESTAÇÃO DE SERVIÇOS DE MANUTENÇÃO EM ELEVADORES.'], ['000776', 'SERVIÇO DE REMOÇÃO OU DESTINAÇÃO DE RESÍDUOS'],
+            ['000777', 'MANUTENÇÃO DE POÇOS ARTESIANOS'], ['000778', 'EQUIPAMENTO DE ACONDICIONAMENTO E PROTEÇÃO'], ['000779', 'MANUTENÇÃO/CONSERTO DE BICICLETA'],
+            ['000780', 'SERVIÇO DE LEVANTAMENTO PATRIMONIAL'], ['000781', 'MATERIAL DE LIMPEZA HOSPITALAR'], ['000782', 'ENFEITES NATALINOS'],
+            ['000783', 'TRANSPORTE COLETIVO URBANO'], ['000784', 'TRANSPORTE COLETIVO DISTRITAL'], ['000785', 'FANTASIAS EDUCATIVAS'], ['000786', 'CESTA BÁSICA'],
+            ['000787', 'CONTRATAÇÃO DE SERVIÇOS NA ÁREA DE TECNOLOGIA DA INFORMAÇÃO'], ['000788', 'SERVIÇO DE CONFECÇÃO EM CORTE E COSTURA'],
+            ['000789', 'MANUTENÇÃO E RECARGA DE EXTINTORES'], ['000790', 'SERVIÇO DE ENGENHARIA'], ['000791', 'PEÇAS PARA USINA DE MICROPAVIMENTO ASFÁLTICO'],
+            ['000792', 'SERVIÇO DE PROPAGANDA VOLANTE'], ['000793', 'SERVIÇOS GERAIS'], ['000794', 'SERVIÇOS DE PRODUÇÕES CINEMATOGRÁFICAS E DE VÍDEOS'],
+            ['000795', 'MATERIAL PARA ABASTECIMENTO D\' ÁGUA E IRRIGAÇÃO'], ['000796', 'EQUIPAMENTOS/MATERIAIS DE TERAPIA OCUPACIONAL DE INTEGRAÇÃO SENSORIAL'],
+            ['000797', 'MANUTENÇÃO/CONSERTO EM EQUIPAMENTO INDUSTRIAL'], ['000798', 'EQUIPAMENTO DE PROTEÇÃO INDIVIDUAL E/OU COLETIVO'],
+            ['000799', 'CONTRATAÇÃO DE INSTITUIÇÃO FINANCEIRA PARA OPERACIONALIZAR CRÉDITOS DA FOLHA DE PAGAMENTO'], ['000800', 'PLACAS E ETIQUETAS DE IDENTIFICAÇÃO'],
+            ['000801', 'SERVIÇOS DE TELEORIENTAÇÃO'], ['000802', 'GERENCIAMENTO DE FROTAS'], ['000803', 'INSTALAÇÃO DE APARELHO DE AR CONDICIONADO'],
+            ['000804', 'INSTALAÇÃO DE APARELHO DE AR CONDICIONADO'], ['000805', 'XXXX XXXXX'], ['000806', 'SERVIÇO DE TURISMO'],
+            ['000807', 'SERVIÇO EM PRODUÇÃO AUDIOVISUAL'], ['000808', 'SERVIÇO DE MANUTENÇÃO EM MATERIAL/EQUIPAMENTO DE SEGURANÇA'], ['000809', '******'],
+            ['000810', '*******'], ['000811', 'MANUTENÇÃO DE SISTEMA DE IRRIGAÇÃO'], ['000812', 'SERVIÇO DE ENTRETENIMENTO E TRANSPORTE RECREATIVO DE PASSAGEIROS'],
+            ['000813', 'SERVIÇOS ON-LINE'], ['000814', 'ARTIGOS PARA CERIMONIAL'], ['000815', 'MANUTENÇÃO/CONSERTO DE EQUIPAMENTO MÉDICO HOSPITALAR E DE FISIOTERAPIA'],
+            ['000816', 'EQUIPAMENTO PARA PESAGEM DE RESÍDUOS SÓLIDOS'], ['000817', '************'], ['000818', '****'],
+            ['000819', 'SERVIÇOS DE LOCAÇÃO DE EQUIPAMENTOS ELETROELETRONICOS E ELETROMECANICOS PARA EVENTOS'], ['000820', 'EQUIPAMENTOS DIVERSOS'],
+            ['000821', 'SERVIÇOS DE CENOGRAFIA'], ['000822', 'GERENCIAMENTO DA FROTA MECANIZADA'], ['000823', 'EQUIPAMENTOS/MATERIAL PARA COMBATE A INCÊNDIO FLORESTAL'],
+            ['000824', 'SERVIÇOS DE BRIGADISTA'], ['000828', 'SERVIÇO DE VÍDEO MONITORAMENTO'], ['000829', 'MATERIAL PARA EDUCAÇÃO EM SAÚDE'],
+            ['000830', 'SERVIÇO DE LOCAÇÃO DE VEÍCULO TIPO TRIO ELÉTRICO'], ['000832', 'SERVIÇO DE LOCAÇÃO DE VEÍCULO TIPO TRIO ELÉTRICO'],
+            ['000833', 'EQUIPAMENTOS/VEÍCULOS PARA USINA DE PROCESSAMENTO DE RESÍDUOS DE CONSTRUÇÃO CIVIL'], ['000834', 'CAÇAMBA ESTACIONÁRIA'],
+            ['000835', 'MANUTENÇÃO/REVISÃO DE VEÍCULOS EM AUTORIZADA'], ['000836', 'MANUTENÇÃO EM EQUIPAMENTOS DE CAPTAÇÃO E GRAVAÇÃO DE ÁUDIO E VÍDEO'],
+            ['000837', 'EQUIPAMENTO PARA TRANSPORTE DE MATERIAIS'], ['000838', 'SERVIÇO DE INSTALAÇÃO/MONTAGEM DE ESTRUTURAS MODULARES'],
+            ['000839', 'EQUIPAMENTO DE SINALIZAÇÃO VIÁRIA HORIZONTAL'], ['000840', 'SERVIÇO/MATERIAL DE SINALIZAÇÃO'], ['000841', 'MATERIAL DESPORTIVO E RECREATIVO'],
+            ['000842', 'AQUISIÇÃO, MANUTENÇÃO, AFERIÇÃO, CALIBRAÇÃO E LACRAÇÃO DE TACÓGRAFOS'], ['000843', 'ARTIGOS PARA KIT NATALIDADE'],
+            ['000844', 'EQUIPAGEM DA NOVA BIBLIOTECA MUNICIPAL E DA CASA DO EMPREENDEDOR'], ['000845', 'SERVIÇOS DE VEÍCULOS AÉREOS NÃO TRIPULADOS'],
+            ['000852', 'MANUTENÇÃO/CONSERTO DE CÂMARAS DE VACINA E MEDICAMENTOS'], ['000854', 'SERVIÇO DE PLANTIO'], ['000855', 'REAGENTES QUÍMICOS E BIOLÓGICOS'],
+            ['000858', 'SISTEMA DE TELEFONIA'], ['000859', 'SERVIÇOS DE LOCAÇÃO DE SISTEMA DE GESTÃO DE SEGURANÇA'],
+            ['000861', 'CONTRATAÇÃO DE EMPRESA PARA PROMOÇÃO DE EVENTOS ESPORTIVOS'], ['000864', 'EQUIPAMENTOS, ACESSÓRIOS E MATÉRIA PRIMA DE INOVAÇÃO TECNOLÓGICA'],
+            ['000865', 'EQUIPAMENTOS, ACESSÓRIOS, SOFTWARE E PLATAFORMAS PARA ESTIMULAÇÃO MULTIDISCIPLINAR'], ['000866', 'EQUIPAMENTOS E ACESSÓRIOS PSICOMOTORES'],
+            ['000867', 'BRINQUEDOS PSICOPEDAGÓGICOS'], ['000868', 'INSTRUMENTOS, PROTOCOLOS DE RASTREIO E AVALIAÇÃO MULTIDIMENSIONAL DE TRANSTORNOS PEDAGÓGICO- SENSÓRIO'],
+            ['000871', 'SERVIÇO EDUCACIONAL ESPECIALIZADO BILÍNGUE'], ['000872', 'FORNECIMENTO DE INGRESSOS'], ['000874', 'SERVIÇO DE ENGENHARIA ELÉTRICA'],
+            ['000876', 'SERVIÇOS E FORNECIMENTOS PARA EVENTOS E COMEMORAÇÕES']
+        ];
+
+        // Processa a lista padrão para garantir que só tenha os 3 últimos dígitos
+        const DEFAULT_GROUPS_LIST = DEFAULT_GROUPS_RAW.map(g => [g[0].slice(-3), g[1]]);
+
+
+        // Variáveis de estado global
+        let userId = null;
+        let userUnitName = null;
+        let globalGroups = []; // Cache local dos grupos
+        let globalRequests = []; // Cache local das solicitações
+        let userRequests = {}; // Cache das solicitações do usuário {groupId: {priority}}
+        let myRequestsUnsubscribe = null; // Para controlar o listener e evitar duplicações
+
+        // --- Funções de Inicialização e Autenticação ---
+
+        /**
+         * Inicializa a aplicação inteira.
+         * Esta função é chamada após o DOM estar pronto.
+         */
+        function initializeApp() {
+            console.log("DOM carregado. Inicializando app...");
+
+            // Carrega ícones
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+
+            // Autenticação Firebase
+            setupAuthListener();
+
+            // Configura Listeners de UI
+            setupNavigation();
+            setupProfileModal();
+            setupGroupForm();
+            setupMyRequestsFilters();
+            setupPrintButton();
+            setupExportButton();
+            setupCSVImport(); // ADICIONADO: Configuração de Importação CSV
+        }
+
+        /**
+         * Configura o listener de autenticação do Firebase.
+         */
+        function setupAuthListener() {
+            const authStatusEl = document.getElementById('authStatus');
+            authStatusEl.textContent = 'Autenticando...';
+
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    console.log("Usuário autenticado:", user.uid);
+                    userId = user.uid;
+                    authStatusEl.textContent = 'Online';
+                    authStatusEl.className = 'text-xs text-green-300';
+                    document.getElementById('currentUserDisplay').textContent = `UserID: ${userId.substring(0, 6)}...`;
+
+                    // Carregar perfil do usuário
+                    await loadUserProfile();
+                    
+                    // Iniciar listeners do Firestore
+                    setupGroupsListener();
+                    setupAllRequestsListener();
+                    setupMyRequestsListener(); 
+
+                } else {
+                    console.log("Usuário não autenticado, tentando login...");
+                    authStatusEl.textContent = 'Offline';
+                    authStatusEl.className = 'text-xs text-red-300';
+                    await signInUser();
+                }
+            }, (error) => {
+                console.error("Erro no listener de autenticação:", error);
+                authStatusEl.textContent = 'Erro de Auth';
+            });
+        }
+
+        /**
+         * Tenta autenticar o usuário, primeiro com token, depois anonimamente.
+         */
+        async function signInUser() {
+            try {
+                if (initialAuthToken) {
+                    console.log("Autenticando com token...");
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    console.log("Autenticando anonimamente...");
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Erro ao autenticar:", error);
+                document.getElementById('authStatus').textContent = 'Falha no Login';
+            }
+        }
+
+        /**
+         * Carrega o perfil do usuário (nome da unidade) ou exibe o modal de perfil.
+         */
+        async function loadUserProfile() {
+            if (!userId) return;
+
+            populateUnitDropdown(); // Popula o dropdown primeiro
+
+            const profileRef = doc(db, `artifacts/${appId}/users/${userId}/profile`, "data");
+            
+            try {
+                const docSnap = await getDoc(profileRef);
+                if (docSnap.exists() && docSnap.data().unitName) {
+                    userUnitName = docSnap.data().unitName;
+                    console.log("Perfil carregado:", userUnitName);
+                    document.getElementById('currentUnitDisplay').textContent = userUnitName;
+                    document.getElementById('unitNameSelect').value = userUnitName;
+                    
+                    // Verifica permissões e ajusta UI
+                    updateUiForUserRole();
+                    
+                    document.getElementById('profileModal').classList.add('hidden');
+                } else {
+                    console.log("Perfil não encontrado. Exibindo modal.");
+                    document.getElementById('profileModal').classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error("Erro ao carregar perfil:", error);
+            }
+        }
+        
+        /**
+         * Atualiza a interface com base no papel do usuário (Unidade).
+         * Se for "Secretaria de Fazenda", mostra abas administrativas.
+         * Caso contrário, oculta.
+         */
+        function updateUiForUserRole() {
+            const adminTabs = ['btn-tab-grupos', 'btn-tab-analise'];
+            const isAdmin = userUnitName === ADMIN_UNIT_NAME;
+            
+            adminTabs.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    if (isAdmin) {
+                        el.classList.remove('hidden');
+                    } else {
+                        el.classList.add('hidden');
+                    }
+                }
+            });
+
+            // Se o usuário não for admin e estiver em uma aba restrita, move para a inicial
+            if (!isAdmin) {
+                const currentTab = document.querySelector('.tab-button.active');
+                if (currentTab && (currentTab.id === 'btn-tab-grupos' || currentTab.id === 'btn-tab-analise')) {
+                    document.getElementById('btn-tab-solicitacoes').click();
+                }
+            }
+        }
+
+        /**
+         * Popula o dropdown de seleção de unidades com a lista de secretarias.
+         */
+        function populateUnitDropdown() {
+            const select = document.getElementById('unitNameSelect');
+            if (select.options.length > 1) return; // Já populado
+
+            // Limpa opções (exceto a primeira "Selecione...")
+            while (select.options.length > 1) {
+                select.remove(1);
+            }
+
+            // Ordena e adiciona secretarias
+            const sortedSecretarias = [...SECRETARIAS_LIST].sort((a, b) => a.localeCompare(b));
+            sortedSecretarias.forEach(name => {
+                const option = document.createElement('option');
+                option.value = name;
+                option.textContent = name;
+                select.appendChild(option);
+            });
+        }
+
+        // --- Funções de UI (Modais, Abas, Filtros) ---
+
+        /**
+         * Configura a navegação por abas.
+         */
+        function setupNavigation() {
+            const tabs = document.querySelectorAll('.tab-button');
+            const contents = document.querySelectorAll('.tab-content');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remove classe 'active' de todas as abas
+                    tabs.forEach(t => t.classList.remove('active'));
+                    // Adiciona 'active' na aba clicada
+                    tab.classList.add('active');
+
+                    // Esconde todos os conteúdos
+                    contents.forEach(c => c.classList.add('hidden'));
+
+                    // Mostra o conteúdo correspondente
+                    const tabId = tab.getAttribute('data-tab');
+                    document.getElementById(tabId).classList.remove('hidden');
+                });
+            });
+        }
+
+        /**
+         * Configura os listeners do modal de perfil.
+         */
+        function setupProfileModal() {
+            const modal = document.getElementById('profileModal');
+            const form = document.getElementById('profileForm');
+            const editButton = document.getElementById('editProfileButton');
+            const cancelButton = document.getElementById('profileModalCancel');
+
+            editButton.addEventListener('click', () => {
+                modal.classList.remove('hidden');
+            });
+            
+            cancelButton.addEventListener('click', () => {
+                if (userUnitName) { // Só fecha se já tiver um perfil salvo
+                    modal.classList.add('hidden');
+                }
+            });
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const newUnitName = document.getElementById('unitNameSelect').value;
+                if (!newUnitName) return;
+
+                console.log("Salvando perfil...");
+                const profileRef = doc(db, `artifacts/${appId}/users/${userId}/profile`, "data");
+                
+                try {
+                    await setDoc(profileRef, { unitName: newUnitName });
+                    userUnitName = newUnitName;
+                    document.getElementById('currentUnitDisplay').textContent = userUnitName;
+                    
+                    // Atualiza permissões
+                    updateUiForUserRole();
+                    
+                    modal.classList.add('hidden');
+                    console.log("Perfil salvo:", newUnitName);
+
+                    // Recarrega as solicitações do usuário para a nova unidade
+                    setupMyRequestsListener();
+
+                } catch (error) {
+                    console.error("Erro ao salvar perfil:", error);
+                }
+            });
+        }
+
+        /**
+         * Configura o botão de impressão.
+         */
+        function setupPrintButton() {
+            document.getElementById('printCalendarButton').addEventListener('click', () => {
+                window.print();
+            });
+        }
+
+        /**
+         * Configura o botão de exportação de relatório.
+         */
+        function setupExportButton() {
+            const btn = document.getElementById('exportReportButton');
+            if (btn) {
+                btn.addEventListener('click', exportReport);
+            }
+        }
+
+        /**
+         * Gera e baixa o relatório consolidado em CSV.
+         */
+        function exportReport() {
+            if (!globalGroups.length || !globalRequests.length) {
+                alert("Ainda não há dados suficientes para gerar o relatório.");
+                return;
+            }
+
+            // 1. Preparar Cabeçalho
+            const sortedUnits = [...SECRETARIAS_LIST].sort((a, b) => a.localeCompare(b));
+            let csvContent = "Nº Grupo;Nome do Grupo;" + sortedUnits.join(";") + "\n";
+
+            // 2. Preparar Mapa de Dados
+            const requestsMap = {};
+            globalRequests.forEach(req => {
+                if (req.priority > 0 && req.unitName) {
+                    if (!requestsMap[req.groupId]) {
+                        requestsMap[req.groupId] = {};
+                    }
+                    requestsMap[req.groupId][req.unitName] = req.priority;
+                }
+            });
+
+            // 3. Iterar sobre todos os grupos para criar as linhas
+            globalGroups.forEach(group => {
+                const groupNum = group.number ? group.number.slice(-3) : "S/N";
+                const groupName = group.name.replace(/;/g, ",");
+                
+                let row = `${groupNum};${groupName}`;
+                
+                sortedUnits.forEach(unit => {
+                    const priority = (requestsMap[group.id] && requestsMap[group.id][unit]) 
+                                     ? requestsMap[group.id][unit] 
+                                     : "";
+                    row += `;${priority}`;
+                });
+                
+                csvContent += row + "\n";
+            });
+
+            // 4. Criar Blob e Baixar
+            const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `Relatorio_Consolidado_Compras_${YEAR}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // --- IMPORTAÇÃO CSV ---
+
+        function setupCSVImport() {
+            const fileInput = document.getElementById('csvFileInput');
+            const btnProcess = document.getElementById('btnProcessImport');
+            const modal = document.getElementById('importConfirmModal');
+            
+            // Botões do modal
+            const btnCancel = document.getElementById('btnImportCancel');
+            const btnSkip = document.getElementById('btnImportSkipExisting');
+            const btnOverwrite = document.getElementById('btnImportOverwrite');
+
+            let parsedGroupsToAdd = [];
+            let parsedGroupsToUpdate = [];
+
+            btnProcess.addEventListener('click', () => {
+                const file = fileInput.files[0];
+                if (!file) {
+                    alert("Por favor, selecione um arquivo CSV.");
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const content = e.target.result;
+                    const lines = content.split(/\r?\n/);
+                    
+                    parsedGroupsToAdd = [];
+                    parsedGroupsToUpdate = [];
+
+                    const existingMap = new Map();
+                    globalGroups.forEach(g => existingMap.set(g.number.slice(-3), g));
+
+                    lines.forEach(line => {
+                        if (!line.trim()) return;
+                        
+                        // Tenta separar por ponto e vírgula ou vírgula
+                        let parts = line.split(';');
+                        if (parts.length < 2) parts = line.split(',');
+                        
+                        if (parts.length >= 2) {
+                            let num = parts[0].trim();
+                            let name = parts[1].trim();
+                            
+                            // Normaliza número para 3 dígitos se possível
+                            if (num.length > 3) num = num.slice(-3);
+                            
+                            // Ignora cabeçalho se parecer cabeçalho
+                            if (num.toLowerCase().includes('grupo') || name.toLowerCase().includes('nome')) return;
+
+                            if (num && name) {
+                                if (existingMap.has(num)) {
+                                    parsedGroupsToUpdate.push({ id: existingMap.get(num).id, number: num, name: name });
+                                } else {
+                                    parsedGroupsToAdd.push({ number: num, name: name });
+                                }
+                            }
+                        }
+                    });
+
+                    if (parsedGroupsToUpdate.length > 0) {
+                        // Exibe modal de conflito
+                        document.getElementById('importConflictMessage').innerHTML = 
+                            `Encontramos <strong>${parsedGroupsToUpdate.length}</strong> grupos que já existem no sistema e <strong>${parsedGroupsToAdd.length}</strong> novos.`;
+                        modal.classList.remove('hidden');
+                    } else if (parsedGroupsToAdd.length > 0) {
+                        // Só novos, processa direto
+                        processBatchImport(parsedGroupsToAdd, []);
+                    } else {
+                        alert("Nenhum grupo válido encontrado ou todos já estão atualizados.");
+                    }
+                };
+                reader.readAsText(file);
+            });
+
+            btnCancel.addEventListener('click', () => {
+                modal.classList.add('hidden');
+                fileInput.value = '';
+            });
+
+            btnSkip.addEventListener('click', () => {
+                processBatchImport(parsedGroupsToAdd, []); // Passa array vazio de updates
+                modal.classList.add('hidden');
+            });
+
+            btnOverwrite.addEventListener('click', () => {
+                processBatchImport(parsedGroupsToAdd, parsedGroupsToUpdate);
+                modal.classList.add('hidden');
+            });
+        }
+
+        async function processBatchImport(toAdd, toUpdate) {
+            if (toAdd.length === 0 && toUpdate.length === 0) return;
+
+            const btn = document.getElementById('btnProcessImport');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Importando...';
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+
+            const totalOps = toAdd.length + toUpdate.length;
+            console.log(`Iniciando importação: ${toAdd.length} novos, ${toUpdate.length} atualizações.`);
+
+            // Firestore batch limit is 500. We must chunk.
+            const BATCH_SIZE = 450; 
+            const allOps = [
+                ...toAdd.map(g => ({ type: 'add', data: g })),
+                ...toUpdate.map(g => ({ type: 'update', data: g }))
+            ];
+
+            try {
+                for (let i = 0; i < allOps.length; i += BATCH_SIZE) {
+                    const batch = writeBatch(db);
+                    const chunk = allOps.slice(i, i + BATCH_SIZE);
+
+                    chunk.forEach(op => {
+                        if (op.type === 'add') {
+                            const ref = doc(collection(db, `artifacts/${appId}/public/data/groups`));
+                            batch.set(ref, op.data);
+                        } else {
+                            const ref = doc(db, `artifacts/${appId}/public/data/groups`, op.data.id);
+                            batch.update(ref, { name: op.data.name });
+                        }
+                    });
+
+                    await batch.commit();
+                    console.log(`Lote de ${chunk.length} processado.`);
+                }
+
+                alert(`Importação concluída com sucesso!\n${toAdd.length} adicionados.\n${toUpdate.length} atualizados.`);
+                document.getElementById('csvFileInput').value = '';
+
+            } catch (error) {
+                console.error("Erro na importação:", error);
+                alert("Erro ao importar dados. Verifique o console.");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            }
+        }
+
+        // --- Aba: Grupos Licitatórios ---
+
+        /**
+         * Configura o listener da coleção de GRUPOS.
+         */
+        function setupGroupsListener() {
+            const groupsCollection = collection(db, `artifacts/${appId}/public/data/groups`);
+            const q = query(groupsCollection);
+
+            onSnapshot(q, (snapshot) => {
+                console.log(`Recebidos ${snapshot.docs.length} grupos.`);
+                globalGroups = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                })).sort((a, b) => (a.number || "").localeCompare(b.number || "", undefined, { numeric: true }));
+                
+                renderGroupsTable(globalGroups);
+                renderMyRequestsTable(); // Atualiza a tabela de solicitações
+                processAndRenderDashboard(); // Atualiza o dashboard
+
+            }, (error) => {
+                console.error("Erro ao ouvir grupos:", error);
+            });
+        }
+
+        /**
+         * Configura o formulário de adicionar/editar grupo e o botão de carga padrão.
+         */
+        function setupGroupForm() {
+            const form = document.getElementById('groupForm');
+            const cancelBtn = document.getElementById('cancelGroupEdit');
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const groupId = document.getElementById('groupId').value;
+                const groupNumber = document.getElementById('groupNumber').value;
+                const groupName = document.getElementById('groupName').value;
+
+                if (!groupName || !groupNumber) return;
+
+                const groupData = { number: groupNumber, name: groupName };
+
+                try {
+                    if (groupId) {
+                        // Atualizar
+                        const groupRef = doc(db, `artifacts/${appId}/public/data/groups`, groupId);
+                        await updateDoc(groupRef, groupData);
+                        console.log("Grupo atualizado:", groupId);
+                    } else {
+                        // Adicionar
+                        const groupsCollection = collection(db, `artifacts/${appId}/public/data/groups`);
+                        await addDoc(groupsCollection, groupData);
+                        console.log("Grupo adicionado:", groupName);
+                    }
+                    form.reset();
+                    document.getElementById('groupId').value = '';
+                    cancelBtn.classList.add('hidden');
+                } catch (error) {
+                    console.error("Erro ao salvar grupo:", error);
+                }
+            });
+
+            cancelBtn.addEventListener('click', () => {
+                form.reset();
+                document.getElementById('groupId').value = '';
+                cancelBtn.classList.add('hidden');
+            });
+
+            // Listener do botão de sincronização
+            document.getElementById('syncDefaultGroups').addEventListener('click', syncDefaultGroups);
+        }
+
+        /**
+         * Sincroniza a lista de grupos padrão com o Firestore.
+         * Adiciona grupos que não existem (baseado no 'number' - últimos 3 dígitos).
+         * Atualiza nomes de grupos que existem mas estão diferentes.
+         * Tenta corrigir números antigos (6 dígitos) para 3 dígitos se encontrar correspondência.
+         */
+        async function syncDefaultGroups() {
+            const button = document.getElementById('syncDefaultGroups');
+            button.disabled = true;
+            button.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Sincronizando...';
+            if (typeof lucide !== 'undefined') { lucide.createIcons(); } 
+
+            console.log("Iniciando sincronização dos grupos padrão...");
+            
+            // 1. Criar um mapa dos grupos existentes no DB para fácil consulta
+            // Usamos os últimos 3 dígitos como chave para normalizar
+            const existingGroupsMap = new Map();
+            globalGroups.forEach(group => {
+                const normalizedNum = group.number ? group.number.slice(-3) : "000";
+                existingGroupsMap.set(normalizedNum, group);
+            });
+
+            console.log(`Encontrados ${existingGroupsMap.size} grupos existentes no DB.`);
+
+            const groupsCollection = collection(db, `artifacts/${appId}/public/data/groups`);
+            const batch = writeBatch(db);
+            let addedCount = 0;
+            let updatedCount = 0;
+
+            // 2. Iterar sobre a lista padrão (que já está com 3 dígitos)
+            for (const groupData of DEFAULT_GROUPS_LIST) {
+                const [shortNumber, name] = groupData;
+                
+                const existingGroup = existingGroupsMap.get(shortNumber);
+
+                if (!existingGroup) {
+                    // Grupo não existe no DB (nem com 3, nem com 6 dígitos terminando nestes 3), então adiciona
+                    const newDocRef = doc(groupsCollection);
+                    batch.set(newDocRef, { number: shortNumber, name: name });
+                    addedCount++;
+                } else {
+                    // Grupo existe. Verifica se precisa atualizar (nome ou número antigo)
+                    let needsUpdate = false;
+                    const updates = {};
+
+                    // Se o nome for diferente, atualiza
+                    if (existingGroup.name !== name) {
+                        updates.name = name;
+                        needsUpdate = true;
+                    }
+
+                    // Se o número no banco for diferente do curto (ex: banco tem '000400', lista tem '400')
+                    // Atualiza para o formato curto
+                    if (existingGroup.number !== shortNumber) {
+                        updates.number = shortNumber;
+                        needsUpdate = true;
+                    }
+
+                    if (needsUpdate) {
+                        const groupRef = doc(db, `artifacts/${appId}/public/data/groups`, existingGroup.id);
+                        batch.update(groupRef, updates);
+                        updatedCount++;
+                    }
+                }
+            }
+
+            if (addedCount === 0 && updatedCount === 0) {
+                alert("O banco de dados de grupos já está sincronizado. Nenhuma alteração foi necessária.");
+                button.disabled = false;
+                button.innerHTML = '<i data-lucide="refresh-cw" class="w-5 h-5"></i> Sincronizar Grupos Padrão';
+                if (typeof lucide !== 'undefined') { lucide.createIcons(); } 
+                return;
+            }
+
+            // 3. Executar o batch
+            try {
+                await batch.commit();
+                const message = `Sincronização concluída!\n- ${addedCount} grupos novos adicionados.\n- ${updatedCount} grupos existentes atualizados/corrigidos.`;
+                console.log(message);
+                alert(message);
+            } catch (error) {
+                console.error("Erro na sincronização em lote:", error);
+                alert("Ocorreu um erro ao sincronizar os grupos.");
+            }
+
+            button.disabled = false;
+            button.innerHTML = '<i data-lucide="refresh-cw" class="w-5 h-5"></i> Sincronizar Grupos Padrão';
+            if (typeof lucide !== 'undefined') { lucide.createIcons(); } 
+        }
+
+
+        /**
+         * Renderiza a tabela de grupos na aba de administração.
+         * @param {Array} groups - A lista de grupos para renderizar.
+         */
+        function renderGroupsTable(groups) {
+            const tableBody = document.getElementById('groupsTable');
+            const filter = document.getElementById('filterGroups').value.toLowerCase();
+            
+            const filteredGroups = groups.filter(g => 
+                g.name.toLowerCase().includes(filter) || 
+                (g.number && g.number.includes(filter)) 
+            );
+
+            if (filteredGroups.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="3" class="px-6 py-4 text-center text-gray-500">Nenhum grupo encontrado.</td></tr>`;
+                return;
+            }
+
+            tableBody.innerHTML = filteredGroups.map(group => `
+                <tr id="group-row-${group.id}">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">${group.number ? group.number.slice(-3) : 'S/N'}</td>
+                    <td class="px-6 py-4 text-sm text-slate-600">${group.name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                        <button data-id="${group.id}" class="edit-group text-blue-600 hover:text-blue-900" title="Editar">
+                            <i data-lucide="edit-2" class="w-5 h-5"></i>
+                        </button>
+                        <button data-id="${group.id}" data-name="${group.name}" class="delete-group text-red-600 hover:text-red-900" title="Excluir">
+                            <i data-lucide="trash-2" class="w-5 h-5"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+
+            // Adiciona listeners para os botões de editar e excluir
+            tableBody.querySelectorAll('.edit-group').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    // CORREÇÃO: Busca o objeto completo no array em memória para evitar erros com aspas no HTML
+                    const id = e.currentTarget.dataset.id;
+                    const group = globalGroups.find(g => g.id === id);
+                    
+                    if (group) {
+                        document.getElementById('groupId').value = group.id;
+                        // Garante que mostra apenas os 3 últimos dígitos no form
+                        document.getElementById('groupNumber').value = group.number ? group.number.slice(-3) : ''; 
+                        document.getElementById('groupName').value = group.name;
+                        
+                        document.getElementById('cancelGroupEdit').classList.remove('hidden');
+                        // Rola suavemente para o topo da aba
+                        document.getElementById('tab-grupos').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                });
+            });
+
+            tableBody.querySelectorAll('.delete-group').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const el = e.currentTarget;
+                    showDeleteConfirmModal(el.dataset.id, el.dataset.name);
+                });
+            });
+
+            // Recarrega ícones
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
+        
+        /**
+         * Exibe o modal de confirmação de deleção.
+         */
+        function showDeleteConfirmModal(groupId, groupName) {
+            const modal = document.getElementById('deleteConfirmModal');
+            document.getElementById('groupNameToDelete').textContent = groupName;
+            
+            const confirmBtn = document.getElementById('confirmDelete');
+            const cancelBtn = document.getElementById('cancelDelete');
+
+            // Remove listeners antigos para evitar chamadas múltiplas
+            const newConfirmBtn = confirmBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+
+            newConfirmBtn.addEventListener('click', async () => {
+                await deleteGroup(groupId);
+                modal.classList.add('hidden');
+            });
+
+            cancelBtn.addEventListener('click', () => {
+                modal.classList.add('hidden');
+            });
+
+            modal.classList.remove('hidden');
+        }
+
+        /**
+         * Deleta um grupo e todas as solicitações associadas (via batch).
+         * @param {string} groupId - O ID do grupo a ser deletado.
+         */
+        async function deleteGroup(groupId) {
+            console.log(`Iniciando exclusão do grupo ${groupId}...`);
+            const batch = writeBatch(db);
+
+            // 1. Referência do grupo a ser deletado
+            const groupRef = doc(db, `artifacts/${appId}/public/data/groups`, groupId);
+            batch.delete(groupRef);
+
+            // 2. Encontrar todas as solicitações associadas a este grupo
+            const requestsCollection = collection(db, `artifacts/${appId}/public/data/requests`);
+            const q = query(requestsCollection, where("year", "==", YEAR), where("groupId", "==", groupId));
+
+            try {
+                const querySnapshot = await getDocs(q);
+                querySnapshot.forEach((doc) => {
+                    console.log(`Marcando para deletar solicitação: ${doc.id}`);
+                    batch.delete(doc.ref);
+                });
+
+                // 3. Executar o batch
+                await batch.commit();
+                console.log(`Grupo ${groupId} e ${querySnapshot.size} solicitações excluídas com sucesso.`);
+
+            } catch (error) {
+                console.error("Erro ao excluir grupo e solicitações:", error);
+                alert("Ocorreu um erro ao excluir o grupo.");
+            }
+        }
+
+        /**
+         * Configura filtros da tabela de grupos (admin).
+         */
+        document.getElementById('filterGroups').addEventListener('input', () => {
+            renderGroupsTable(globalGroups);
+        });
+
+
+        // --- Aba: Minhas Solicitações ---
+
+        /**
+         * Configura o listener da coleção de SOLICITAÇÕES (para "Minhas Solicitações").
+         */
+        function setupMyRequestsListener() {
+            if (!userId) return;
+            
+            // Se não tem unidade definida, não carrega nada (ou limpa)
+            if (!userUnitName) {
+                userRequests = {};
+                renderMyRequestsTable();
+                return;
+            }
+
+            // Cancela listener anterior se existir (para não misturar dados ao trocar unidade)
+            if (myRequestsUnsubscribe) {
+                myRequestsUnsubscribe();
+                myRequestsUnsubscribe = null;
+            }
+
+            const requestsCollection = collection(db, `artifacts/${appId}/public/data/requests`);
+            // Query busca por ano e usuário (a filtragem por unidade será feita em memória para evitar erros de índice)
+            const q = query(requestsCollection, where("year", "==", YEAR), where("userId", "==", userId));
+
+            myRequestsUnsubscribe = onSnapshot(q, (snapshot) => {
+                console.log(`Recebidas ${snapshot.docs.length} solicitações do usuário.`);
+                userRequests = {}; // Limpa o cache local
+                
+                snapshot.docs.forEach(doc => {
+                    const data = doc.data();
+                    // FILTRAGEM CRÍTICA: Só aceita dados da unidade atual
+                    if (data.unitName === userUnitName) {
+                        userRequests[data.groupId] = {
+                            id: doc.id,
+                            priority: data.priority
+                        };
+                    }
+                });
+                
+                // Atualiza a tabela de "Minhas Solicitações"
+                renderMyRequestsTable();
+
+            }, (error) => {
+                console.error("Erro ao ouvir minhas solicitações:", error);
+            });
+        }
+
+        /**
+         * Configura filtros e botão de salvar da aba "Minhas Solicitações".
+         */
+        function setupMyRequestsFilters() {
+            document.getElementById('filterMyRequests').addEventListener('input', renderMyRequestsTable);
+            document.getElementById('showOnlyPending').addEventListener('change', renderMyRequestsTable);
+            document.getElementById('saveAllMyRequests').addEventListener('click', saveAllMyRequests);
+        }
+
+        /**
+         * Renderiza a tabela de "Minhas Solicitações".
+         */
+        function renderMyRequestsTable() {
+            const tableBody = document.getElementById('myRequestsTable');
+            const filter = document.getElementById('filterMyRequests').value.toLowerCase();
+            const showOnlyPending = document.getElementById('showOnlyPending').checked;
+
+            if (globalGroups.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="3" class="px-6 py-4 text-center text-gray-500">Nenhum grupo licitatório cadastrado.</td></tr>`;
+                return;
+            }
+
+            let filteredGroups = globalGroups.filter(g => {
+                const nameMatch = g.name.toLowerCase().includes(filter) || (g.number && g.number.includes(filter));
+                if (!nameMatch) return false;
+
+                const userRequest = userRequests[g.id];
+                const isPending = !userRequest || userRequest.priority === 0;
+                
+                if (showOnlyPending) {
+                    return isPending;
+                }
+                return true;
+            });
+
+            if (filteredGroups.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="3" class="px-6 py-4 text-center text-gray-500">Nenhum grupo corresponde ao filtro.</td></tr>`;
+                return;
+            }
+
+            tableBody.innerHTML = filteredGroups.map(group => {
+                const userRequest = userRequests[group.id];
+                const currentPriority = userRequest ? userRequest.priority : 0;
+
+                return `
+                    <tr id="my-request-row-${group.id}">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">${group.number ? group.number.slice(-3) : 'S/N'}</td>
+                        <td class="px-6 py-4 text-sm text-slate-600">${group.name}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <select data-group-id="${group.id}" data-original-value="${currentPriority}" class="priority-select w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                <option value="0" ${currentPriority === 0 ? 'selected' : ''}>0 (Sem Interesse)</option>
+                                ${[1,2,3,4,5,6,7,8,9,10].map(p => `
+                                    <option value="${p}" ${currentPriority === p ? 'selected' : ''}>${p}</option>
+                                `).join('')}
+                            </select>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            // Adiciona classe de 'changed' se o valor for alterado
+            tableBody.querySelectorAll('.priority-select').forEach(select => {
+                select.addEventListener('change', (e) => {
+                    const originalValue = e.target.dataset.originalValue;
+                    const newValue = e.target.value;
+                    if (newValue !== originalValue) {
+                        e.target.classList.add('bg-yellow-100'); // Marca como alterado
+                    } else {
+                        e.target.classList.remove('bg-yellow-100');
+                    }
+                });
+            });
+        }
+
+        /**
+         * Salva todas as alterações pendentes em "Minhas Solicitações" em um batch.
+         */
+        async function saveAllMyRequests() {
+            if (!userUnitName) {
+                alert("Por favor, configure sua unidade antes de salvar.");
+                document.getElementById('profileModal').classList.remove('hidden');
+                return;
+            }
+
+            const btn = document.getElementById('saveAllMyRequests');
+            const originalBtnContent = btn.innerHTML;
+            
+            // Mudar estado do botão para "Carregando"
+            btn.disabled = true;
+            btn.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> <span>Salvando...</span>';
+            if (typeof lucide !== 'undefined') { lucide.createIcons(); }
+
+            const selects = document.querySelectorAll('.priority-select');
+            const batch = writeBatch(db);
+            let changesCount = 0;
+
+            selects.forEach(select => {
+                const newPriority = parseInt(select.value, 10);
+                const originalPriority = parseInt(select.dataset.originalValue, 10);
+                
+                // Salva apenas se o valor mudou
+                if (newPriority === originalPriority) return;
+
+                changesCount++;
+                const groupId = select.dataset.groupId;
+                const existingRequest = userRequests[groupId];
+
+                const requestData = {
+                    userId: userId,
+                    unitName: userUnitName,
+                    groupId: groupId,
+                    year: YEAR,
+                    priority: newPriority
+                };
+
+                if (existingRequest && existingRequest.id) {
+                    // Atualiza (ou deleta se for 0)
+                    const requestRef = doc(db, `artifacts/${appId}/public/data/requests`, existingRequest.id);
+                    if (newPriority > 0) {
+                        batch.update(requestRef, { priority: newPriority, unitName: userUnitName });
+                    } else {
+                        // Se a prioridade for 0, remove a solicitação
+                        batch.delete(requestRef);
+                    }
+                } else if (newPriority > 0) {
+                    // Cria nova (só se prioridade > 0)
+                    const requestRef = doc(collection(db, `artifacts/${appId}/public/data/requests`));
+                    batch.set(requestRef, requestData);
+                }
+            });
+
+            if (changesCount === 0) {
+                // Reverter botão
+                btn.disabled = false;
+                btn.innerHTML = originalBtnContent;
+                alert("Nenhuma alteração para salvar.");
+                return;
+            }
+
+            try {
+                await batch.commit();
+                console.log(`Batch salvo com ${changesCount} alterações.`);
+                
+                // Feedback de Sucesso no Botão
+                btn.classList.remove('bg-blue-800', 'hover:bg-blue-700');
+                btn.classList.add('bg-green-600', 'hover:bg-green-500');
+                btn.innerHTML = '<i data-lucide="check" class="w-5 h-5"></i> <span>Salvo!</span>';
+                if (typeof lucide !== 'undefined') { lucide.createIcons(); }
+
+                // Reverter após 2 segundos
+                setTimeout(() => {
+                    btn.classList.add('bg-blue-800', 'hover:bg-blue-700');
+                    btn.classList.remove('bg-green-600', 'hover:bg-green-500');
+                    btn.innerHTML = originalBtnContent;
+                    btn.disabled = false;
+                    if (typeof lucide !== 'undefined') { lucide.createIcons(); }
+                }, 2000);
+
+            } catch (error) {
+                console.error("Erro ao salvar solicitações:", error);
+                alert("Ocorreu um erro ao salvar. Tente novamente.");
+                btn.disabled = false;
+                btn.innerHTML = originalBtnContent;
+            }
+        }
+
+        // --- Aba: Análise e Calendário (Processamento Geral) ---
+
+        /**
+         * Configura o listener de TODAS as solicitações para o painel geral.
+         */
+        function setupAllRequestsListener() {
+            const requestsCollection = collection(db, `artifacts/${appId}/public/data/requests`);
+            const q = query(requestsCollection, where("year", "==", YEAR));
+
+            onSnapshot(q, (snapshot) => {
+                console.log(`Recebidas ${snapshot.docs.length} solicitações GLOBAIS.`);
+                globalRequests = snapshot.docs.map(doc => doc.data());
+                
+                // Processa e renderiza o dashboard e calendário
+                processAndRenderDashboard();
+
+            }, (error) => {
+                console.error("Erro ao ouvir todas as solicitações:", error);
+            });
+        }
+
+        /**
+         * Ponto central para processar dados e atualizar o dashboard e o calendário.
+         */
+        function processAndRenderDashboard() {
+            if (globalGroups.length === 0) {
+                console.log("Processamento adiado, grupos ainda não carregados.");
+                return;
+            }
+
+            // 1. Agregar dados
+            // { groupId: { group: {...}, requests: [...], totalPriority: 0, averagePriority: 0 } }
+            const aggregatedData = {};
+
+            // Inicializa com todos os grupos
+            globalGroups.forEach(group => {
+                aggregatedData[group.id] = {
+                    group: group,
+                    requests: [],
+                    totalPriority: 0,
+                    averagePriority: 0
+                };
+            });
+
+            // Agrega solicitações válidas (prioridade > 0)
+            globalRequests.forEach(req => {
+                if (req.priority > 0 && aggregatedData[req.groupId]) {
+                    aggregatedData[req.groupId].requests.push(req);
+                    aggregatedData[req.groupId].totalPriority += req.priority;
+                }
+            });
+            
+            // Calcula Prioridade Média
+            Object.values(aggregatedData).forEach(item => {
+                if (item.requests.length > 0) {
+                    item.averagePriority = item.totalPriority / item.requests.length;
+                }
+            });
+
+            // 2. Classificar em listas
+            const allDemands = Object.values(aggregatedData)
+                                     .filter(item => item.requests.length > 0)
+                                     .sort((a, b) => b.averagePriority - a.averagePriority); // Ordena por prioridade MÉDIA
+            
+            const commonRequests = allDemands.filter(item => item.requests.length > 2);
+            const specificRequests = allDemands.filter(item => item.requests.length >= 1 && item.requests.length <= 2);
+
+            // 3. Renderizar Métricas
+            renderMetrics(allDemands, commonRequests, specificRequests);
+
+            // 4. Renderizar Listas de Análise
+            renderAnalysisLists(commonRequests, specificRequests);
+
+            // 5. Renderizar Detalhes por Unidade
+            renderUnitDetails();
+
+            // 6. Renderizar Calendário Global
+            renderGlobalCalendar(commonRequests, specificRequests);
+        }
+
+        /**
+         * Renderiza os cards de métricas.
+         */
+        function renderMetrics(allDemands, common, specific) {
+            document.getElementById('metricTotalGroups').textContent = globalGroups.length;
+            document.getElementById('metricDemandGroups').textContent = allDemands.length;
+            document.getElementById('metricCommonRequests').textContent = common.length;
+            document.getElementById('metricSpecificRequests').textContent = specific.length;
+        }
+
+        /**
+         * Renderiza as listas de Pedidos Comuns e Específicos.
+         */
+        function renderAnalysisLists(commonRequests, specificRequests) {
+            const commonListEl = document.getElementById('commonRequestsList');
+            const specificListEl = document.getElementById('specificRequestsList');
+            
+            const renderRow = (item) => `
+                <tr>
+                    <td class="px-4 py-3 text-sm font-medium text-slate-800">${item.group.number ? item.group.number.slice(-3) : 'S/N'}</td>
+                    <td class="px-4 py-3 text-sm text-slate-600">${item.group.name}</td>
+                    <td class="px-4 py-3 text-sm text-slate-600 text-center">${item.requests.length}</td>
+                    <td class="px-4 py-3 text-sm text-slate-600 text-center">${item.averagePriority.toFixed(2)}</td>
+                </tr>
+            `;
+
+            commonListEl.innerHTML = commonRequests.length > 0 
+                ? commonRequests.map(renderRow).join('') 
+                : '<tr><td colspan="4" class="p-4 text-center text-slate-500">Nenhum pedido comum.</td></tr>';
+            
+            specificListEl.innerHTML = specificRequests.length > 0
+                ? specificRequests.map(renderRow).join('')
+                : '<tr><td colspan="4" class="p-4 text-center text-slate-500">Nenhum pedido específico.</td></tr>';
+        }
+
+        /**
+         * Renderiza a tabela de detalhes por unidade.
+         */
+        function renderUnitDetails() {
+            const unitDetails = {};
+
+            globalRequests.forEach(req => {
+                if (req.priority > 0 && req.unitName) { // Garante que unitName exista
+                    if (!unitDetails[req.unitName]) {
+                        unitDetails[req.unitName] = {
+                            count: 0,
+                            totalPriority: 0
+                        };
+                    }
+                    unitDetails[req.unitName].count++;
+                    unitDetails[req.unitName].totalPriority += req.priority;
+                }
+            });
+
+            const sortedUnits = Object.keys(unitDetails).sort();
+            const tableBody = document.getElementById('unitDetailsList');
+
+            if (sortedUnits.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-slate-500">Nenhuma solicitação registrada.</td></tr>';
+                return;
+            }
+
+            tableBody.innerHTML = sortedUnits.map(unitName => {
+                const data = unitDetails[unitName];
+                const average = (data.totalPriority / data.count).toFixed(1);
+                return `
+                    <tr>
+                        <td class="px-4 py-3 text-sm font-medium text-slate-800">${unitName}</td>
+                        <td class="px-4 py-3 text-sm text-slate-600">${data.count}</td>
+                        <td class="px-4 py-3 text-sm text-slate-600">${data.totalPriority}</td>
+                        <td class="px-4 py-3 text-sm text-slate-600">${average}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        /**
+         * Distribui a lista de demandas pelos 12 meses.
+         * @param {Array} demands - Lista de demandas (comuns ou específicas)
+         * @param {Array} monthsSchedule - Array de 12 meses para preencher
+         */
+        function distributeDemands(demands, monthsSchedule) {
+            demands.forEach((demand, index) => {
+                const monthIndex = index % 12; // Distribuição "round-robin"
+                monthsSchedule[monthIndex].push(demand);
+            });
+        }
+
+        /**
+         * Renderiza o calendário global mês a mês.
+         */
+        function renderGlobalCalendar(commonRequests, specificRequests) {
+            const calendarArea = document.getElementById('calendar-print-area');
+            const MONTHS_ORDER = [
+                "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+                "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+            ];
+
+            // Cria a estrutura dos 12 meses
+            let monthsSchedule = MONTHS_ORDER.map(() => ({
+                common: [],
+                specific: []
+            }));
+
+            // Distribui os pedidos comuns (que já estão ordenados por prioridade MÉDIA)
+            distributeDemands(commonRequests, monthsSchedule.map(m => m.common));
+            
+            // Distribui os pedidos específicos (que já estão ordenados por prioridade MÉDIA)
+            distributeDemands(specificRequests, monthsSchedule.map(m => m.specific));
+
+            // Renderiza o HTML
+            calendarArea.innerHTML = MONTHS_ORDER.map((monthName, index) => {
+                const monthData = monthsSchedule[index];
+                
+                const renderCard = (item, isCommon) => {
+                    // Obtém a lista de nomes das unidades interessadas
+                    const interestedUnits = item.requests.map(r => r.unitName).join(', ');
+                    
+                    return `
+                    <div class="calendar-card border ${isCommon ? 'border-blue-300 bg-blue-50' : 'border-purple-300 bg-purple-50'} rounded-lg p-3 shadow-sm mb-2 break-inside-avoid">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-sm text-slate-800">${item.group.number ? item.group.number.slice(-3) : 'S/N'}</span>
+                            <span class="text-xs ${isCommon ? 'text-blue-700' : 'text-purple-700'} font-medium">
+                                ${isCommon ? 'COMUM' : 'ESPECÍFICO'}
+                            </span>
+                        </div>
+                        <p class="text-sm text-slate-700 mt-1 font-medium">${item.group.name}</p>
+                        <div class="text-xs text-slate-500 mt-2 flex justify-between items-center">
+                             <span>Média: <strong>${item.averagePriority.toFixed(1)}</strong></span>
+                             <span>Qtd: <strong>${item.requests.length}</strong></span>
+                        </div>
+                        <div class="text-xs text-slate-600 mt-2 pt-1 border-t border-slate-200">
+                            <span class="font-semibold">Interessados:</span> ${interestedUnits}
+                        </div>
+                    </div>
+                `};
+
+                const commonHtml = monthData.common.length > 0 
+                    ? monthData.common.map(item => renderCard(item, true)).join('')
+                    : '<p class="text-sm text-slate-500 italic">Nenhum pedido comum este mês.</p>';
+                
+                const specificHtml = monthData.specific.length > 0
+                    ? monthData.specific.map(item => renderCard(item, false)).join('')
+                    : '<p class="text-sm text-slate-500 italic">Nenhum pedido específico este mês.</p>';
+
+                return `
+                    <div class="calendar-month mb-8">
+                        <h3 class="text-xl font-semibold text-blue-800 border-b-2 border-blue-200 pb-2 mb-4">${monthName} ${YEAR}</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Coluna Pedidos Comuns -->
+                            <div class="space-y-3">
+                                <h4 class="text-lg font-semibold text-slate-700 border-b border-gray-200 pb-1 mb-2">Pedidos Comuns</h4>
+                                <div class="space-y-3">${commonHtml}</div>
+                            </div>
+                            <!-- Coluna Pedidos Específicos -->
+                            <div class="space-y-3">
+                                <h4 class="text-lg font-semibold text-slate-700 border-b border-gray-200 pb-1 mb-2">Pedidos Específicos</h4>
+                                <div class="space-y-3">${specificHtml}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // --- Ponto de Entrada ---
+        // Garante que o script só rode após o HTML estar completo
+        document.addEventListener('DOMContentLoaded', initializeApp);
+
+    </script>
+
+</body>
+</html>
