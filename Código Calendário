@@ -504,11 +504,30 @@
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-        // Inicializa Firebase
-        const app = initializeAppFirebase(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-        setLogLevel('Debug'); // Habilita logs detalhados do Firestore
+        // Inicialização do Firebase protegida por try/catch
+        let app = null;
+        let db = null;
+        let auth = null;
+        let firebaseReady = false;
+
+        function initializeFirebase() {
+            try {
+                if (!firebaseConfig || Object.keys(firebaseConfig).length === 0) {
+                    console.error("Configuração do Firebase ausente ou incompleta.");
+                    return;
+                }
+
+                app = initializeAppFirebase(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                setLogLevel('Debug'); // Habilita logs detalhados do Firestore
+                firebaseReady = true;
+            } catch (error) {
+                console.error("Erro ao inicializar o Firebase:", error);
+            }
+        }
+
+        initializeFirebase();
 
         // Constantes Globais
         const YEAR = "2026";
@@ -701,10 +720,15 @@
 
         /**
          * Inicializa a aplicação inteira.
-         * Esta função é chamada após o DOM estar pronto.
+        * Esta função é chamada após o DOM estar pronto.
          */
         function initializeApp() {
             console.log("DOM carregado. Inicializando app...");
+
+            if (!firebaseReady) {
+                showStartupError("Não foi possível iniciar a aplicação porque as credenciais do Firebase não foram fornecidas.");
+                return;
+            }
 
             // Carrega ícones
             if (typeof lucide !== 'undefined') {
@@ -722,6 +746,30 @@
             setupPrintButton();
             setupExportButton();
             setupCSVImport(); // ADICIONADO: Configuração de Importação CSV
+        }
+
+        /**
+         * Exibe uma mensagem de erro quando a aplicação não consegue iniciar.
+         * Isso ajuda a evitar falhas silenciosas quando o Firebase não está configurado.
+         */
+        function showStartupError(message) {
+            const authStatusEl = document.getElementById('authStatus');
+            if (authStatusEl) {
+                authStatusEl.textContent = 'Erro de configuração';
+                authStatusEl.className = 'text-xs text-red-300';
+            }
+
+            const mainContainer = document.querySelector('main');
+            if (mainContainer) {
+                const alertBox = document.createElement('div');
+                alertBox.className = 'bg-red-50 border border-red-200 text-red-800 rounded-lg p-4 mb-4';
+                alertBox.innerHTML = `
+                    <div class="font-semibold mb-1">Falha ao iniciar</div>
+                    <p class="text-sm">${message}</p>
+                    <p class="text-xs text-red-600 mt-2">Defina a variável global <code>__firebase_config</code> antes de carregar a página.</p>
+                `;
+                mainContainer.prepend(alertBox);
+            }
         }
 
         /**
